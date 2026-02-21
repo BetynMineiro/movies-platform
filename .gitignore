@@ -1,0 +1,67 @@
+# dependencies
+node_modules/
+
+# package manager artifacts
+.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# build output
+dist/
+build/
+out/
+.next/
+
+# tests and coverage
+coverage/
+.nyc_output/
+
+# logs and diagnostics
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+pids
+*.pid
+*.seed
+*.pid.lock
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# environment files
+.env
+.env.*
+
+# temp
+.temp/
+.tmp/
+
+# OS / editor
+.DS_Store
+.contexts/
+.idea/
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# VS Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# misc
+*.pem
+*.tsbuildinfo
+frontend/movie-app/next-env.d.ts
+.vercel/
