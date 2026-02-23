@@ -31,9 +31,68 @@ It also includes search and relationship-based navigation, such as:
 - Ensure stable behavior and graceful error handling.
 - Keep the project structure clear for future evolution.
 
-## Note
+## Local Development
 
-Detailed technical setup and usage instructions will be added after implementation is complete.
+### Prerequisites
+
+- Node.js 20+
+- npm 10+
+
+### Install dependencies
+
+From repository root:
+
+```bash
+npm --prefix backend/movie-api ci --legacy-peer-deps
+npm --prefix frontend/movie-app ci
+```
+
+### Run backend and frontend locally
+
+Backend (NestJS on `3000`):
+
+```bash
+cd backend/movie-api
+npm run start:dev
+```
+
+Frontend (Next.js on `3001`):
+
+```bash
+cd frontend/movie-app
+npm run dev
+```
+
+Local URLs:
+
+- Backend API: http://localhost:3000
+- Swagger: http://localhost:3000/docs
+- Frontend: http://localhost:3001
+
+Frontend uses `NEXT_PUBLIC_API_BASE_URL` when defined; otherwise it defaults to `http://localhost:3000`.
+
+### Run tests
+
+Backend unit tests:
+
+```bash
+cd backend/movie-api
+npm run test
+```
+
+Backend e2e tests:
+
+```bash
+cd backend/movie-api
+npm run test:e2e
+```
+
+Frontend tests:
+
+```bash
+cd frontend/movie-app
+npm run test
+```
 
 ## Docker Demo Environment
 
