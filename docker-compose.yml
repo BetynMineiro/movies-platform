@@ -9,6 +9,7 @@ services:
       BACKEND_PORT: 3000
       FRONTEND_PORT: 3001
       JWT_SECRET: undefined-secret-key
+      CORS_ORIGINS: http://localhost:3001,http://127.0.0.1:3001
     ports:
       - "3000:3000"
       - "3001:3001"

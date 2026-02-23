@@ -1,4 +1,9 @@
-import { apiClient, setAccessToken } from "./api-client";
+import {
+  apiClient,
+  clearAccessToken,
+  getAccessToken,
+  setAccessToken,
+} from "./api-client";
 
 export interface LoginResponse {
   accessToken: string;
@@ -29,4 +34,12 @@ export async function login(
   setAccessToken(payload.accessToken);
 
   return payload;
+}
+
+export function logout(): void {
+  clearAccessToken();
+}
+
+export function isAuthenticated(): boolean {
+  return Boolean(getAccessToken());
 }

@@ -1,5 +1,5 @@
 import { apiClient } from "../../services/api-client";
-import { login } from "../../services/auth.service";
+import { isAuthenticated, login, logout } from "../../services/auth.service";
 
 describe("login service", () => {
   beforeEach(() => {
@@ -35,5 +35,21 @@ describe("login service", () => {
     );
 
     postSpy.mockRestore();
+  });
+
+  it("clears token on logout", () => {
+    window.localStorage.setItem("accessToken", "token-logout");
+
+    logout();
+
+    expect(window.localStorage.getItem("accessToken")).toBeNull();
+  });
+
+  it("reports authentication state", () => {
+    window.localStorage.setItem("accessToken", "token-auth");
+    expect(isAuthenticated()).toBe(true);
+
+    window.localStorage.removeItem("accessToken");
+    expect(isAuthenticated()).toBe(false);
   });
 });

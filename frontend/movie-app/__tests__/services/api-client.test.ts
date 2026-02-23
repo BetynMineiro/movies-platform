@@ -1,6 +1,7 @@
 import {
   apiClient,
   clearAccessToken,
+  getAccessToken,
   setAccessToken,
 } from "../../services/api-client";
 
@@ -34,5 +35,11 @@ describe("apiClient interceptor", () => {
     clearAccessToken();
 
     expect(window.localStorage.getItem("accessToken")).toBeNull();
+  });
+
+  it("reads token from localStorage", () => {
+    setAccessToken("token-to-read");
+
+    expect(getAccessToken()).toBe("token-to-read");
   });
 });

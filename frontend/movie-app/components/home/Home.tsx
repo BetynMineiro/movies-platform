@@ -1,12 +1,16 @@
 import Link from "next/link";
+import { LogoutButton } from "@/components/auth";
 
 export function Home() {
   return (
     <section className="relative overflow-hidden rounded-3xl border border-black/10 bg-white/80 px-6 py-10 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5 sm:px-10 sm:py-14">
       <div className="flex flex-col gap-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.25em] text-stone-500 dark:text-stone-400">
-          Movies platform
-        </p>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-stone-500 dark:text-stone-400">
+            Movies platform
+          </p>
+          <LogoutButton className="rounded-full border border-stone-300 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-stone-600 transition hover:border-stone-400 dark:border-stone-600 dark:text-stone-300 dark:hover:border-stone-400" />
+        </div>
         <div className="flex flex-col gap-4">
           <h1 className="text-3xl font-semibold leading-tight text-stone-900 dark:text-stone-100 sm:text-4xl lg:text-5xl">
             Navigate movies, actors, and ratings in one place.
