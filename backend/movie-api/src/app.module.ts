@@ -4,15 +4,14 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
+import { MoviesModule } from './movies/movies.module';
 import { SeedModule } from './seed/seed.module';
-import { RequestContextService } from './common/context/request-context.service';
-import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
-import { TracingInterceptor } from './common/interceptors/tracing.interceptor';
-import { AppLoggerService } from './common/services/app-logger.service';
 import { HealthCheckModule } from './healthcheck/healthcheck.module';
+import { CommonModule } from './common/common.module';
 
 @Module({
   imports: [
+    CommonModule,
     TypeOrmModule.forRoot({
       type: 'sqlite',
       database: 'database.sqlite',
@@ -21,14 +20,11 @@ import { HealthCheckModule } from './healthcheck/healthcheck.module';
     }),
     AuthModule,
     UsersModule,
+    MoviesModule,
     SeedModule,
     HealthCheckModule,
   ],
   providers: [
-    RequestContextService,
-    AppLoggerService,
-    TracingInterceptor,
-    LoggingInterceptor,
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,

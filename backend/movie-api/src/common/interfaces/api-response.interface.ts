@@ -4,6 +4,6 @@ export interface ApiResponse<T> {
     total?: number;
     limit?: number;
     hasNext?: boolean;
-    nextCursor?: number;
+    nextCursor?: string | number;
   };
 }

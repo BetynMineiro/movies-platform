@@ -12,7 +12,7 @@ describe('UsersService', () => {
   let repository: jest.Mocked<Repository<User>>;
 
   const mockUser: User = {
-    id: '123',
+    id: 1,
     email: 'test@example.com',
     password: 'hashedPassword',
     role: 'user',
@@ -69,18 +69,18 @@ describe('UsersService', () => {
     it('should return a user when found', async () => {
       repository.findOne.mockResolvedValue(mockUser);
 
-      const result = await service.findById('123');
+      const result = await service.findById(1);
 
       expect(result).toEqual(mockUser);
       expect(repository.findOne).toHaveBeenCalledWith({
-        where: { id: '123' },
+        where: { id: 1 },
       });
     });
 
     it('should return null when user not found', async () => {
       repository.findOne.mockResolvedValue(null);
 
-      const result = await service.findById('nonexistent');
+      const result = await service.findById(999);
 
       expect(result).toBeNull();
     });

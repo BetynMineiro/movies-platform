@@ -6,22 +6,22 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-@Entity('users')
-export class User {
+@Entity('movies')
+export class Movie {
   @PrimaryGeneratedColumn('increment')
   id: number;
 
-  @Column({ unique: true })
-  email: string;
+  @Column()
+  title: string;
+
+  @Column('text')
+  description: string;
 
   @Column()
-  password: string;
+  releaseYear: number;
 
-  @Column({ default: 'user' })
-  role: string;
-
-  @Column({ default: true })
-  isActive: boolean;
+  @Column()
+  genre: string;
 
   @CreateDateColumn()
   createdAt: Date;
