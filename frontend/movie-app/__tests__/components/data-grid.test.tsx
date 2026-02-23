@@ -455,4 +455,89 @@ describe("DataGrid", () => {
     expect(aliceRow).not.toHaveClass("bg-stone-200/60");
     jest.useRealTimers();
   });
+
+  it("hides add button when showAdd is false", () => {
+    render(
+      <DataGrid
+        title="Users"
+        rows={rows}
+        columns={columns}
+        showAdd={false}
+        page={1}
+        pageSize={2}
+        onPageChange={jest.fn()}
+        onUpdate={jest.fn()}
+        onDelete={jest.fn()}
+      />,
+    );
+
+    expect(
+      screen.queryByRole("button", { name: "+ Add" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows add button when showAdd is true", () => {
+    render(
+      <DataGrid
+        title="Users"
+        rows={rows}
+        columns={columns}
+        showAdd
+        page={1}
+        pageSize={2}
+        onPageChange={jest.fn()}
+        onUpdate={jest.fn()}
+        onDelete={jest.fn()}
+        onAdd={jest.fn()}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: "+ Add" })).toBeInTheDocument();
+  });
+
+  it("calls onAdd when add button is clicked", () => {
+    const onAdd = jest.fn();
+
+    render(
+      <DataGrid
+        title="Users"
+        rows={rows}
+        columns={columns}
+        showAdd
+        page={1}
+        pageSize={2}
+        onPageChange={jest.fn()}
+        onUpdate={jest.fn()}
+        onDelete={jest.fn()}
+        onAdd={onAdd}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "+ Add" }));
+    expect(onAdd).toHaveBeenCalled();
+  });
+
+  it("clears selected row when add button is clicked", () => {
+    render(
+      <DataGrid
+        title="Users"
+        rows={rows}
+        columns={columns}
+        showAdd
+        page={1}
+        pageSize={2}
+        onPageChange={jest.fn()}
+        onUpdate={jest.fn()}
+        onDelete={jest.fn()}
+        onAdd={jest.fn()}
+      />,
+    );
+
+    fireEvent.click(screen.getByText("Alice"));
+    const aliceRow = screen.getByText("Alice").closest("tr");
+    expect(aliceRow).toHaveClass("bg-stone-200/60");
+
+    fireEvent.click(screen.getByRole("button", { name: "+ Add" }));
+    expect(aliceRow).not.toHaveClass("bg-stone-200/60");
+  });
 });

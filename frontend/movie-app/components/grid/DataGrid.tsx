@@ -118,6 +118,11 @@ export default function DataGrid<T extends { id: number | string }>({
     onPageChange(targetPage);
   };
 
+  const handleAdd = () => {
+    setInternalSelectedRowId(undefined);
+    onAdd?.();
+  };
+
   return (
     <section className="rounded-3xl border border-black/10 bg-white/80 px-6 py-6 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5 sm:px-8">
       <div className="border-b border-stone-200 pb-4 dark:border-stone-700">
@@ -142,7 +147,7 @@ export default function DataGrid<T extends { id: number | string }>({
         {showAdd ? (
           <button
             type="button"
-            onClick={onAdd}
+            onClick={handleAdd}
             className="rounded-full border border-green-300 bg-green-50 px-4 py-2 text-sm font-semibold text-green-700 transition hover:border-green-400 hover:bg-green-100 dark:border-green-700 dark:bg-green-900/20 dark:text-green-300 dark:hover:border-green-600 dark:hover:bg-green-900/40"
           >
             + Add
