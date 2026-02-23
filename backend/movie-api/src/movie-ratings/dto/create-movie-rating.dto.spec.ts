@@ -6,7 +6,7 @@ describe('CreateMovieRatingDto', () => {
     const dto = new CreateMovieRatingDto();
     dto.score = score;
     dto.movieId = 1;
-    dto.comment = 'Ok';
+    dto.comment = 'Good';
     return dto;
   };
 
