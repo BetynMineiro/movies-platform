@@ -5,6 +5,7 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { MoviesModule } from './movies/movies.module';
+import { ActorsModule } from './actors/actors.module';
 import { SeedModule } from './seed/seed.module';
 import { HealthCheckModule } from './healthcheck/healthcheck.module';
 import { CommonModule } from './common/common.module';
@@ -21,6 +22,7 @@ import { CommonModule } from './common/common.module';
     AuthModule,
     UsersModule,
     MoviesModule,
+    ActorsModule,
     SeedModule,
     HealthCheckModule,
   ],
