@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { getAccessToken } from "@/services/api-client";
 
@@ -11,26 +11,23 @@ interface AuthGateProps {
 export default function AuthGate({ children }: AuthGateProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const [isReady, setIsReady] = useState(false);
+  const token = getAccessToken();
+  const isLoginRoute = pathname === "/login";
+  const shouldRedirectToLogin = !token && !isLoginRoute;
+  const shouldRedirectToHome = Boolean(token) && isLoginRoute;
 
   useEffect(() => {
-    const token = getAccessToken();
-    const isLoginRoute = pathname === "/login";
-
-    if (!token && !isLoginRoute) {
+    if (shouldRedirectToLogin) {
       router.replace("/login");
       return;
     }
 
-    if (token && isLoginRoute) {
+    if (shouldRedirectToHome) {
       router.replace("/");
-      return;
     }
+  }, [router, shouldRedirectToHome, shouldRedirectToLogin]);
 
-    setIsReady(true);
-  }, [pathname, router]);
-
-  if (!isReady) {
+  if (shouldRedirectToLogin || shouldRedirectToHome) {
     return <div className="min-h-screen" />;
   }
 

@@ -439,7 +439,6 @@ describe("MoviesPage", () => {
 
     await waitFor(() => {
       const updateButtons = screen.queryAllByRole("button", { name: "Update" });
-      const deleteButtons = screen.queryAllByRole("button", { name: "Delete" });
 
       // The movies grid still has update/delete, but actors and ratings grids should not
       // We should only have the first set from the movies grid

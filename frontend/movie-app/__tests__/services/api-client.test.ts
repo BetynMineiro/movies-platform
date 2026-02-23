@@ -13,8 +13,7 @@ describe("apiClient interceptor", () => {
   it("adds Authorization header when token exists", () => {
     setAccessToken("test-token");
 
-    const handler = (apiClient.interceptors.request as any).handlers[0]
-      .fulfilled;
+    const handler = getRequestInterceptorHandler();
     const config = handler({ headers: {} });
 
     expect(config.headers.Authorization).toBe("Bearer test-token");
@@ -23,8 +22,7 @@ describe("apiClient interceptor", () => {
   it("does not add Authorization header when token is missing", () => {
     clearAccessToken();
 
-    const handler = (apiClient.interceptors.request as any).handlers[0]
-      .fulfilled;
+    const handler = getRequestInterceptorHandler();
     const config = handler({ headers: {} });
 
     expect(config.headers.Authorization).toBeUndefined();
@@ -43,3 +41,17 @@ describe("apiClient interceptor", () => {
     expect(getAccessToken()).toBe("token-to-read");
   });
 });
+type RequestConfigWithHeaders = {
+  headers: Record<string, string>;
+};
+
+type RequestInterceptorHandler = {
+  fulfilled: (config: RequestConfigWithHeaders) => RequestConfigWithHeaders;
+};
+
+const getRequestInterceptorHandler = () =>
+  (
+    apiClient.interceptors.request as unknown as {
+      handlers: RequestInterceptorHandler[];
+    }
+  ).handlers[0].fulfilled;

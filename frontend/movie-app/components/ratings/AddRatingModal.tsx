@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 interface AddRatingModalProps {
   isOpen: boolean;
@@ -18,16 +18,6 @@ export default function AddRatingModal({
   const [reviewer, setReviewer] = useState("");
   const [comment, setComment] = useState("");
   const [rating, setRating] = useState("");
-
-  useEffect(() => {
-    if (!isOpen) {
-      return;
-    }
-
-    setReviewer("");
-    setComment("");
-    setRating("");
-  }, [isOpen]);
 
   if (!isOpen) {
     return null;

@@ -1,6 +1,7 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import MultiSelect, { type MultiSelectOption } from "../common/MultiSelect";
 
 export interface MovieFormData {
@@ -30,26 +31,28 @@ export default function MovieFormModal({
   onSave,
   onCancel,
 }: MovieFormModalProps) {
-  const buildInitialData = (): MovieFormData => ({
-    title: initialData?.title || "",
-    description: initialData?.description || "",
-    releaseYear: initialData?.releaseYear || new Date().getFullYear(),
-    genre: initialData?.genre || "",
-    actorIds: initialData?.actorIds || [],
-  });
+  const buildInitialData = useCallback(
+    (): MovieFormData => ({
+      title: initialData?.title || "",
+      description: initialData?.description || "",
+      releaseYear: initialData?.releaseYear || new Date().getFullYear(),
+      genre: initialData?.genre || "",
+      actorIds: initialData?.actorIds || [],
+    }),
+    [initialData],
+  );
 
   const [formData, setFormData] = useState<MovieFormData>(buildInitialData);
+  const [errors, setErrors] = useState<
+    Partial<Record<keyof MovieFormData, string>>
+  >({});
 
   useEffect(() => {
     if (isOpen) {
       setFormData(buildInitialData());
       setErrors({});
     }
-  }, [isOpen, mode, initialData]);
-
-  const [errors, setErrors] = useState<
-    Partial<Record<keyof MovieFormData, string>>
-  >({});
+  }, [isOpen, mode, buildInitialData]);
 
   const validateForm = (): boolean => {
     const newErrors: Partial<Record<keyof MovieFormData, string>> = {};

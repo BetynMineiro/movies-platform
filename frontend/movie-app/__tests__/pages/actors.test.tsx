@@ -752,7 +752,6 @@ describe("ActorsPage", () => {
     });
 
     const updateButtons = screen.queryAllByRole("button", { name: "Update" });
-    const deleteButtons = screen.queryAllByRole("button", { name: "Delete" });
 
     // The actors grid still has update/delete, but movies and ratings grids should not
     const movieSectionUpdateButtons = updateButtons.filter(

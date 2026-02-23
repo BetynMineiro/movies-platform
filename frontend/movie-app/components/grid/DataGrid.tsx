@@ -69,14 +69,6 @@ export default function DataGrid<T extends { id: number | string }>({
   const onFilterRef = useRef(onFilter);
 
   useEffect(() => {
-    if (selectedRowId === undefined) {
-      return;
-    }
-
-    setInternalSelectedRowId(selectedRowId);
-  }, [selectedRowId]);
-
-  useEffect(() => {
     onFilterRef.current = onFilter;
   }, [onFilter]);
 

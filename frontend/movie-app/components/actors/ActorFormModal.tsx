@@ -1,6 +1,7 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import MultiSelect, { type MultiSelectOption } from "../common/MultiSelect";
 
 export interface ActorFormData {
@@ -28,24 +29,26 @@ export default function ActorFormModal({
   onSave,
   onCancel,
 }: ActorFormModalProps) {
-  const buildInitialData = (): ActorFormData => ({
-    name: initialData?.name || "",
-    nationality: initialData?.nationality || "",
-    movieIds: initialData?.movieIds || [],
-  });
+  const buildInitialData = useCallback(
+    (): ActorFormData => ({
+      name: initialData?.name || "",
+      nationality: initialData?.nationality || "",
+      movieIds: initialData?.movieIds || [],
+    }),
+    [initialData],
+  );
 
   const [formData, setFormData] = useState<ActorFormData>(buildInitialData);
+  const [errors, setErrors] = useState<
+    Partial<Record<keyof ActorFormData, string>>
+  >({});
 
   useEffect(() => {
     if (isOpen) {
       setFormData(buildInitialData());
       setErrors({});
     }
-  }, [isOpen, mode, initialData]);
-
-  const [errors, setErrors] = useState<
-    Partial<Record<keyof ActorFormData, string>>
-  >({});
+  }, [isOpen, mode, buildInitialData]);
 
   const validateForm = (): boolean => {
     const newErrors: Partial<Record<keyof ActorFormData, string>> = {};

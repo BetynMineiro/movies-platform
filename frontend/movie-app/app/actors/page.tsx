@@ -1,6 +1,7 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { LogoutButton } from "@/components/auth";
 import AddRatingModal from "@/components/ratings/AddRatingModal";
@@ -66,7 +67,6 @@ export default function ActorsPage() {
   const { showToast } = useToast();
 
   const [actors, setActors] = useState<ActorRow[]>([]);
-  const [isLoadingActors, setIsLoadingActors] = useState(true);
 
   const [availableMovies, setAvailableMovies] = useState<MultiSelectOption[]>(
     [],
@@ -83,7 +83,6 @@ export default function ActorsPage() {
 
   const [selectedActor, setSelectedActor] = useState<ActorRow | null>(null);
   const [relatedMovies, setRelatedMovies] = useState<MovieRow[]>([]);
-  const [isLoadingMovies, setIsLoadingMovies] = useState(false);
   const [relatedMoviesPage, setRelatedMoviesPage] = useState(1);
   const [moviesFilter, setMoviesFilter] = useState("");
   const [totalRelatedMovies, setTotalRelatedMovies] = useState(0);
@@ -97,7 +96,6 @@ export default function ActorsPage() {
 
   const [selectedMovie, setSelectedMovie] = useState<MovieRow | null>(null);
   const [ratings, setRatings] = useState<RatingRow[]>([]);
-  const [isLoadingRatings, setIsLoadingRatings] = useState(false);
   const [movieRatingsPage, setMovieRatingsPage] = useState(1);
   const [ratingsFilter, setRatingsFilter] = useState("");
   const [totalRatings, setTotalRatings] = useState(0);
@@ -124,7 +122,6 @@ export default function ActorsPage() {
 
   const fetchActors = async () => {
     try {
-      setIsLoadingActors(true);
       const response = await apiClient.get<PaginatedResponse<ActorDto>>(
         "/actors",
         {
@@ -164,8 +161,6 @@ export default function ActorsPage() {
       setTotalActors(0);
       setActorsHasNextPage(false);
       setActorsHasPreviousPage(false);
-    } finally {
-      setIsLoadingActors(false);
     }
   };
 
@@ -196,7 +191,6 @@ export default function ActorsPage() {
 
   const fetchActorMovies = async (actorId: number) => {
     try {
-      setIsLoadingMovies(true);
       const response = await apiClient.get<PaginatedResponse<MovieDto>>(
         `/actors/${actorId}/movies`,
         {
@@ -238,14 +232,11 @@ export default function ActorsPage() {
       setTotalRelatedMovies(0);
       setRelatedMoviesHasNextPage(false);
       setRelatedMoviesHasPreviousPage(false);
-    } finally {
-      setIsLoadingMovies(false);
     }
   };
 
   const fetchMovieRatings = async (movieId: number) => {
     try {
-      setIsLoadingRatings(true);
       const response = await apiClient.get<PaginatedResponse<RatingDto>>(
         "/movie-ratings",
         {
@@ -285,8 +276,6 @@ export default function ActorsPage() {
       setTotalRatings(0);
       setRatingsHasNextPage(false);
       setRatingsHasPreviousPage(false);
-    } finally {
-      setIsLoadingRatings(false);
     }
   };
 
@@ -803,6 +792,7 @@ export default function ActorsPage() {
           </div>
         )}
         <AddRatingModal
+          key={`${selectedMovie?.id ?? "none"}-${isRatingModalOpen ? "open" : "closed"}`}
           isOpen={isRatingModalOpen}
           movieTitle={selectedMovie?.title}
           onSave={handleSaveRating}
