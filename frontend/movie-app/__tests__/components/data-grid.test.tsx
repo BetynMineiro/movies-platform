@@ -27,6 +27,7 @@ describe("DataGrid", () => {
         columns={columns}
         page={1}
         pageSize={2}
+        serverPagination={false}
         onPageChange={jest.fn()}
         onUpdate={jest.fn()}
         onDelete={jest.fn()}

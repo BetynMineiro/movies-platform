@@ -36,6 +36,7 @@ jest.mock("../../services", () => ({
 }));
 
 const mockApiClient = apiClient as jest.Mocked<typeof apiClient>;
+const originalConsoleError = console.error;
 
 const mockActorsData = {
   data: [
@@ -163,8 +164,8 @@ const mockRatingsData = {
   data: [
     {
       id: 1,
-      rating: 9,
-      review: "Mind-bending masterpiece",
+      score: 9,
+      comment: "Mind-bending masterpiece",
       userId: 1,
       movieId: 1,
       createdAt: "2024-01-01",
@@ -172,8 +173,8 @@ const mockRatingsData = {
     },
     {
       id: 2,
-      rating: 8,
-      review: "Great visual effects",
+      score: 8,
+      comment: "Great visual effects",
       userId: 2,
       movieId: 1,
       createdAt: "2024-01-01",
@@ -191,6 +192,24 @@ const mockRatingsData = {
 };
 
 describe("ActorsPage", () => {
+  beforeAll(() => {
+    jest.spyOn(console, "error").mockImplementation((...args: unknown[]) => {
+      const firstArg = args[0];
+      if (
+        typeof firstArg === "string" &&
+        firstArg.includes("not wrapped in act")
+      ) {
+        return;
+      }
+
+      originalConsoleError(...args);
+    });
+  });
+
+  afterAll(() => {
+    (console.error as jest.Mock).mockRestore();
+  });
+
   beforeEach(() => {
     (useRouter as jest.Mock).mockReturnValue({
       push: jest.fn(),
@@ -228,8 +247,12 @@ describe("ActorsPage", () => {
     });
   });
 
-  it("does not show related grids on initial render", () => {
+  it("does not show related grids on initial render", async () => {
     render(<ActorsPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Leonardo DiCaprio")).toBeInTheDocument();
+    });
 
     expect(
       screen.queryByText(/Movies with "Leonardo DiCaprio"/),
@@ -674,15 +697,23 @@ describe("ActorsPage", () => {
     expect(screen.queryByText("Comentario cancelado")).not.toBeInTheDocument();
   });
 
-  it("renders back and home buttons", () => {
+  it("renders back and home buttons", async () => {
     render(<ActorsPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Leonardo DiCaprio")).toBeInTheDocument();
+    });
 
     expect(screen.getByRole("button", { name: "Voltar" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Home" })).toBeInTheDocument();
   });
 
-  it("renders logout button", () => {
+  it("renders logout button", async () => {
     render(<ActorsPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Leonardo DiCaprio")).toBeInTheDocument();
+    });
 
     expect(screen.getByRole("button", { name: "Logout" })).toBeInTheDocument();
   });

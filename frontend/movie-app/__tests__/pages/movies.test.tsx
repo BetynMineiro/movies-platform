@@ -36,6 +36,7 @@ jest.mock("../../services", () => ({
 }));
 
 const mockApiClient = apiClient as jest.Mocked<typeof apiClient>;
+const originalConsoleError = console.error;
 
 const mockMoviesData = {
   data: [
@@ -173,8 +174,8 @@ const mockRatingsData = {
   data: [
     {
       id: 1,
-      rating: 9,
-      review: "Mind-bending masterpiece",
+      score: 9,
+      comment: "Mind-bending masterpiece",
       userId: 1,
       movieId: 1,
       createdAt: "2024-01-01",
@@ -182,8 +183,8 @@ const mockRatingsData = {
     },
     {
       id: 2,
-      rating: 8,
-      review: "Great visual effects",
+      score: 8,
+      comment: "Great visual effects",
       userId: 2,
       movieId: 1,
       createdAt: "2024-01-01",
@@ -201,6 +202,24 @@ const mockRatingsData = {
 };
 
 describe("MoviesPage", () => {
+  beforeAll(() => {
+    jest.spyOn(console, "error").mockImplementation((...args: unknown[]) => {
+      const firstArg = args[0];
+      if (
+        typeof firstArg === "string" &&
+        firstArg.includes("not wrapped in act")
+      ) {
+        return;
+      }
+
+      originalConsoleError(...args);
+    });
+  });
+
+  afterAll(() => {
+    (console.error as jest.Mock).mockRestore();
+  });
+
   beforeEach(() => {
     (useRouter as jest.Mock).mockReturnValue({
       push: jest.fn(),
