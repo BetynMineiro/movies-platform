@@ -30,7 +30,6 @@ ENV JWT_SECRET=undefined-secret-key
 COPY --from=backend-builder /app/backend/movie-api/dist ./backend/movie-api/dist
 COPY --from=backend-builder /app/backend/movie-api/package*.json ./backend/movie-api/
 COPY --from=backend-prod-deps /app/backend/movie-api/node_modules ./backend/movie-api/node_modules
-COPY --from=backend-builder /app/backend/movie-api/database.sqlite ./backend/movie-api/database.sqlite
 COPY --from=backend-builder /app/backend/movie-api/src/seed/data/seed-data.json ./backend/movie-api/src/seed/data/seed-data.json
 COPY --from=backend-builder /app/backend/movie-api/src/seed/data/seed-data.json ./backend/movie-api/dist/seed/data/seed-data.json
 

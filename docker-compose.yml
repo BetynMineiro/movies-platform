@@ -12,5 +12,3 @@ services:
     ports:
       - "3000:3000"
       - "3001:3001"
-    volumes:
-      - ./backend/movie-api/database.sqlite:/app/backend/movie-api/database.sqlite
