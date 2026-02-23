@@ -1,26 +1,26 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { RequestContextService } from '../common/context/request-context.service';
 import { AppLoggerService } from '../common/services/app-logger.service';
-import { HealthcheckController } from './healthcheck.controller';
-import { HealthcheckService } from './healthcheck.service';
+import { HealthCheckController } from './healthcheck.controller';
+import { HealthCheckService } from './healthcheck.service';
 
-describe('HealthcheckController', () => {
-  let healthcheckController: HealthcheckController;
+describe('HealthCheckController', () => {
+  let healthCheckController: HealthCheckController;
 
   beforeEach(async () => {
     const app: TestingModule = await Test.createTestingModule({
-      controllers: [HealthcheckController],
-      providers: [HealthcheckService, RequestContextService, AppLoggerService],
+      controllers: [HealthCheckController],
+      providers: [HealthCheckService, RequestContextService, AppLoggerService],
     }).compile();
 
-    healthcheckController = app.get<HealthcheckController>(
-      HealthcheckController,
+    healthCheckController = app.get<HealthCheckController>(
+      HealthCheckController,
     );
   });
 
   describe('health check', () => {
     it('should return API health status', () => {
-      expect(healthcheckController.getHealthcheck()).toEqual({
+      expect(healthCheckController.getHealthCheck()).toEqual({
         data: {
           status: 'ok',
         },

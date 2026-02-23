@@ -9,7 +9,7 @@ import { RequestContextService } from './common/context/request-context.service'
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { TracingInterceptor } from './common/interceptors/tracing.interceptor';
 import { AppLoggerService } from './common/services/app-logger.service';
-import { HealthcheckModule } from './healthcheck/healthcheck.module';
+import { HealthCheckModule } from './healthcheck/healthcheck.module';
 
 @Module({
   imports: [
@@ -22,7 +22,7 @@ import { HealthcheckModule } from './healthcheck/healthcheck.module';
     AuthModule,
     UsersModule,
     SeedModule,
-    HealthcheckModule,
+    HealthCheckModule,
   ],
   providers: [
     RequestContextService,

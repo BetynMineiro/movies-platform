@@ -3,11 +3,11 @@ import { ApiResponse } from '../common/interfaces/api-response.interface';
 import { AppLoggerService } from '../common/services/app-logger.service';
 
 @Injectable()
-export class HealthcheckService {
+export class HealthCheckService {
   constructor(private readonly appLogger: AppLoggerService) {}
 
   getStatus(): ApiResponse<{ status: string }> {
-    this.appLogger.log('Healthcheck requested', HealthcheckService.name);
+    this.appLogger.log('HealthCheck requested', HealthCheckService.name);
 
     return {
       data: {

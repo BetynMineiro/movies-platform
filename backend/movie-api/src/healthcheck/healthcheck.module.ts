@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { RequestContextService } from '../common/context/request-context.service';
 import { AppLoggerService } from '../common/services/app-logger.service';
-import { HealthcheckController } from './healthcheck.controller';
-import { HealthcheckService } from './healthcheck.service';
+import { HealthCheckController } from './healthcheck.controller';
+import { HealthCheckService } from './healthcheck.service';
 
 @Module({
-  controllers: [HealthcheckController],
-  providers: [HealthcheckService, RequestContextService, AppLoggerService],
+  controllers: [HealthCheckController],
+  providers: [HealthCheckService, RequestContextService, AppLoggerService],
 })
-export class HealthcheckModule {}
+export class HealthCheckModule {}
