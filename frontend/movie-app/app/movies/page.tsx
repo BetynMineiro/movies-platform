@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { LogoutButton } from "@/components/auth";
 import AddRatingModal from "@/components/ratings/AddRatingModal";
@@ -9,19 +9,28 @@ import { useToast } from "@/contexts/ToastContext";
 import { ConfirmDeleteModal } from "@/components/common";
 import { MovieFormModal, type MovieFormData } from "@/components/movies";
 import type { MultiSelectOption } from "@/components/common";
+import { apiClient } from "@/services";
+import type {
+  MovieDto,
+  ActorDto,
+  PaginatedResponse,
+  CreateMovieDto,
+  UpdateMovieDto,
+  RatingDto,
+} from "@/types/api";
 
 interface MovieRow {
   id: number;
   title: string;
   genre: string;
   year: number;
+  description: string;
 }
 
 interface ActorRow {
   id: number;
   name: string;
   nationality: string;
-  age: number;
 }
 
 interface RatingRow {
@@ -30,128 +39,6 @@ interface RatingRow {
   reviewer: string;
   comment: string;
 }
-
-// Mock data for movies
-const movieRows: MovieRow[] = [
-  { id: 1, title: "Inception", genre: "Sci-Fi", year: 2010 },
-  { id: 2, title: "The Dark Knight", genre: "Action", year: 2008 },
-  { id: 3, title: "Interstellar", genre: "Sci-Fi", year: 2014 },
-  { id: 4, title: "Parasite", genre: "Drama", year: 2019 },
-  { id: 5, title: "Whiplash", genre: "Drama", year: 2014 },
-  { id: 6, title: "Arrival", genre: "Sci-Fi", year: 2016 },
-];
-
-// Mock data for actors by movie
-const movieActors: Record<number, ActorRow[]> = {
-  1: [
-    { id: 1, name: "Leonardo DiCaprio", nationality: "USA", age: 51 },
-    { id: 2, name: "Marion Cotillard", nationality: "France", age: 49 },
-    { id: 3, name: "Ellen Page", nationality: "Canada", age: 37 },
-    { id: 5, name: "Cillian Murphy", nationality: "Ireland", age: 50 },
-  ],
-  2: [
-    { id: 1, name: "Leonardo DiCaprio", nationality: "USA", age: 51 },
-    { id: 4, name: "Natalie Portman", nationality: "Israel", age: 45 },
-    { id: 6, name: "Ana de Armas", nationality: "Cuba", age: 38 },
-  ],
-  3: [
-    { id: 1, name: "Leonardo DiCaprio", nationality: "USA", age: 51 },
-    { id: 3, name: "Song Kang-ho", nationality: "South Korea", age: 59 },
-    { id: 5, name: "Cillian Murphy", nationality: "Ireland", age: 50 },
-  ],
-  4: [
-    { id: 3, name: "Song Kang-ho", nationality: "South Korea", age: 59 },
-    { id: 4, name: "Natalie Portman", nationality: "Israel", age: 45 },
-  ],
-  5: [
-    { id: 2, name: "Scarlett Johansson", nationality: "USA", age: 42 },
-    { id: 5, name: "Cillian Murphy", nationality: "Ireland", age: 50 },
-  ],
-  6: [
-    { id: 2, name: "Scarlett Johansson", nationality: "USA", age: 42 },
-    { id: 4, name: "Natalie Portman", nationality: "Israel", age: 45 },
-  ],
-};
-
-// Mock data for ratings by movie
-const movieRatings: Record<number, RatingRow[]> = {
-  1: [
-    {
-      id: 1,
-      rating: 9,
-      reviewer: "John Doe",
-      comment: "Mind-bending masterpiece",
-    },
-    {
-      id: 2,
-      rating: 8,
-      reviewer: "Jane Smith",
-      comment: "Great visual effects",
-    },
-    { id: 3, rating: 9, reviewer: "Bob Johnson", comment: "Excellent plot" },
-    {
-      id: 4,
-      rating: 8,
-      reviewer: "Alice Brown",
-      comment: "Confusing but great",
-    },
-    { id: 5, rating: 7, reviewer: "Charlie Davis", comment: "Good movie" },
-  ],
-  2: [
-    { id: 6, rating: 9, reviewer: "David Lee", comment: "Best Batman movie" },
-    {
-      id: 7,
-      rating: 9,
-      reviewer: "Eve Wilson",
-      comment: "Joker performance is insane",
-    },
-    { id: 8, rating: 8, reviewer: "Frank Miller", comment: "Dark and gritty" },
-  ],
-  3: [
-    {
-      id: 9,
-      rating: 8,
-      reviewer: "Grace Taylor",
-      comment: "Epic space adventure",
-    },
-    {
-      id: 10,
-      rating: 9,
-      reviewer: "Henry White",
-      comment: "Beautiful cinematography",
-    },
-  ],
-  4: [
-    {
-      id: 11,
-      rating: 8,
-      reviewer: "Ivy King",
-      comment: "Sharp social commentary",
-    },
-  ],
-  5: [
-    {
-      id: 12,
-      rating: 9,
-      reviewer: "Jack Thomas",
-      comment: "Intense and brilliant",
-    },
-  ],
-  6: [
-    {
-      id: 13,
-      rating: 7,
-      reviewer: "Karen Harris",
-      comment: "Thought-provoking",
-    },
-    {
-      id: 14,
-      rating: 8,
-      reviewer: "Leo Martin",
-      comment: "Interesting concept",
-    },
-  ],
-};
 
 const movieColumns: DataGridColumn<MovieRow>[] = [
   { key: "title", header: "Title" },
@@ -171,17 +58,49 @@ const ratingColumns: DataGridColumn<RatingRow>[] = [
 export default function MoviesPage() {
   const router = useRouter();
   const { showToast } = useToast();
+
+  const [movies, setMovies] = useState<MovieRow[]>([]);
+  const [isLoadingMovies, setIsLoadingMovies] = useState(true);
+
+  const [availableActors, setAvailableActors] = useState<MultiSelectOption[]>(
+    [],
+  );
+
   const [page, setPage] = useState(1);
   const [filter, setFilter] = useState("");
+  const [totalMovies, setTotalMovies] = useState(0);
+  const [moviesCursorByPage, setMoviesCursorByPage] = useState<
+    Record<number, number | undefined>
+  >({ 1: undefined });
+  const [moviesHasNextPage, setMoviesHasNextPage] = useState(false);
+  const [moviesHasPreviousPage, setMoviesHasPreviousPage] = useState(false);
+
   const [selectedMovie, setSelectedMovie] = useState<MovieRow | null>(null);
+  const [relatedActors, setRelatedActors] = useState<ActorRow[]>([]);
+  const [isLoadingActors, setIsLoadingActors] = useState(false);
   const [relatedActorsPage, setRelatedActorsPage] = useState(1);
   const [actorsFilter, setActorsFilter] = useState("");
+  const [totalRelatedActors, setTotalRelatedActors] = useState(0);
+  const [relatedActorsCursorByPage, setRelatedActorsCursorByPage] = useState<
+    Record<number, number | undefined>
+  >({ 1: undefined });
+  const [relatedActorsHasNextPage, setRelatedActorsHasNextPage] =
+    useState(false);
+  const [relatedActorsHasPreviousPage, setRelatedActorsHasPreviousPage] =
+    useState(false);
+
+  const [ratings, setRatings] = useState<RatingRow[]>([]);
+  const [isLoadingRatings, setIsLoadingRatings] = useState(false);
   const [movieRatingsPage, setMovieRatingsPage] = useState(1);
   const [ratingsFilter, setRatingsFilter] = useState("");
-  const [ratingsByMovie, setRatingsByMovie] = useState(movieRatings);
+  const [totalRatings, setTotalRatings] = useState(0);
+  const [ratingsCursorByPage, setRatingsCursorByPage] = useState<
+    Record<number, number | undefined>
+  >({ 1: undefined });
+  const [ratingsHasNextPage, setRatingsHasNextPage] = useState(false);
+  const [ratingsHasPreviousPage, setRatingsHasPreviousPage] = useState(false);
   const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
 
-  // Movie CRUD modals
   const [isMovieFormOpen, setIsMovieFormOpen] = useState(false);
   const [movieFormMode, setMovieFormMode] = useState<"create" | "edit">(
     "create",
@@ -193,19 +112,195 @@ export default function MoviesPage() {
   const pageSize = 4;
   const relatedDataPageSize = 5;
 
-  // Mock available actors for multiselect (in real app, fetch from API with large page size)
-  const availableActors: MultiSelectOption[] = [
-    { id: 1, label: "Leonardo DiCaprio" },
-    { id: 2, label: "Marion Cotillard" },
-    { id: 3, label: "Ellen Page" },
-    { id: 4, label: "Natalie Portman" },
-    { id: 5, label: "Cillian Murphy" },
-    { id: 6, label: "Ana de Armas" },
-    { id: 7, label: "Song Kang-ho" },
-    { id: 8, label: "Scarlett Johansson" },
-  ];
+  const fetchMovies = async () => {
+    try {
+      setIsLoadingMovies(true);
+      const response = await apiClient.get<PaginatedResponse<MovieDto>>(
+        "/movies",
+        {
+          params: {
+            limit: pageSize,
+            ...(filter && { title: filter }),
+            ...(page > 1 && moviesCursorByPage[page]
+              ? { cursor: moviesCursorByPage[page] }
+              : {}),
+          },
+        },
+      );
 
-  const filteredMovieRows = movieRows.filter((movie) => {
+      const movieRows: MovieRow[] = response.data.data.map((movie) => ({
+        id: movie.id,
+        title: movie.title,
+        genre: movie.genre,
+        year: movie.releaseYear,
+        description: movie.description,
+      }));
+
+      const meta = response.data.meta;
+
+      setMovies(movieRows);
+      setTotalMovies(meta?.total ?? movieRows.length);
+      setMoviesHasNextPage(Boolean(meta?.hasNextPage ?? meta?.hasNext));
+      setMoviesHasPreviousPage(Boolean(meta?.hasPreviousPage));
+
+      if (meta?.nextCursor !== undefined) {
+        setMoviesCursorByPage((prev) => ({
+          ...prev,
+          [page + 1]: Number(meta.nextCursor),
+        }));
+      }
+    } catch (error) {
+      console.error("Error fetching movies:", error);
+      showToast("Failed to load movies. Please try again.", "error");
+      setMovies([]);
+      setTotalMovies(0);
+      setMoviesHasNextPage(false);
+      setMoviesHasPreviousPage(false);
+    } finally {
+      setIsLoadingMovies(false);
+    }
+  };
+
+  const fetchAllActors = async () => {
+    try {
+      const response = await apiClient.get<PaginatedResponse<ActorDto>>(
+        "/actors",
+        {
+          params: {
+            limit: 100,
+          },
+        },
+      );
+
+      const actorOptions: MultiSelectOption[] = response.data.data.map(
+        (actor) => ({
+          id: actor.id,
+          label: actor.name,
+        }),
+      );
+
+      setAvailableActors(actorOptions);
+    } catch (error) {
+      console.error("Error fetching actors:", error);
+      setAvailableActors([]);
+    }
+  };
+
+  const fetchMovieActors = async (movieId: number) => {
+    try {
+      setIsLoadingActors(true);
+      const response = await apiClient.get<PaginatedResponse<ActorDto>>(
+        `/movies/${movieId}/actors`,
+        {
+          params: {
+            limit: relatedDataPageSize,
+            ...(actorsFilter && { name: actorsFilter }),
+            ...(relatedActorsPage > 1 &&
+            relatedActorsCursorByPage[relatedActorsPage]
+              ? { cursor: relatedActorsCursorByPage[relatedActorsPage] }
+              : {}),
+          },
+        },
+      );
+
+      const actorRows: ActorRow[] = response.data.data.map((actor) => ({
+        id: actor.id,
+        name: actor.name,
+        nationality: actor.nationality,
+      }));
+
+      const meta = response.data.meta;
+
+      setRelatedActors(actorRows);
+      setTotalRelatedActors(meta?.total ?? actorRows.length);
+      setRelatedActorsHasNextPage(Boolean(meta?.hasNextPage ?? meta?.hasNext));
+      setRelatedActorsHasPreviousPage(Boolean(meta?.hasPreviousPage));
+
+      if (meta?.nextCursor !== undefined) {
+        setRelatedActorsCursorByPage((prev) => ({
+          ...prev,
+          [relatedActorsPage + 1]: Number(meta.nextCursor),
+        }));
+      }
+    } catch (error) {
+      console.error("Error fetching movie actors:", error);
+      setRelatedActors([]);
+      setTotalRelatedActors(0);
+      setRelatedActorsHasNextPage(false);
+      setRelatedActorsHasPreviousPage(false);
+    } finally {
+      setIsLoadingActors(false);
+    }
+  };
+
+  const fetchMovieRatings = async (movieId: number) => {
+    try {
+      setIsLoadingRatings(true);
+      const response = await apiClient.get<PaginatedResponse<RatingDto>>(
+        "/movie-ratings",
+        {
+          params: {
+            movieId,
+            limit: relatedDataPageSize,
+            ...(movieRatingsPage > 1 && ratingsCursorByPage[movieRatingsPage]
+              ? { cursor: ratingsCursorByPage[movieRatingsPage] }
+              : {}),
+          },
+        },
+      );
+
+      const ratingRows: RatingRow[] = response.data.data.map((rating) => ({
+        id: rating.id,
+        rating: rating.rating,
+        reviewer: `User ${rating.userId}`,
+        comment: rating.review,
+      }));
+
+      const meta = response.data.meta;
+
+      setRatings(ratingRows);
+      setTotalRatings(meta?.total ?? ratingRows.length);
+      setRatingsHasNextPage(Boolean(meta?.hasNextPage ?? meta?.hasNext));
+      setRatingsHasPreviousPage(Boolean(meta?.hasPreviousPage));
+
+      if (meta?.nextCursor !== undefined) {
+        setRatingsCursorByPage((prev) => ({
+          ...prev,
+          [movieRatingsPage + 1]: Number(meta.nextCursor),
+        }));
+      }
+    } catch (error) {
+      console.error("Error fetching movie ratings:", error);
+      setRatings([]);
+      setTotalRatings(0);
+      setRatingsHasNextPage(false);
+      setRatingsHasPreviousPage(false);
+    } finally {
+      setIsLoadingRatings(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchMovies();
+  }, [page, filter]);
+
+  useEffect(() => {
+    fetchAllActors();
+  }, []);
+
+  useEffect(() => {
+    if (selectedMovie) {
+      fetchMovieActors(selectedMovie.id);
+    }
+  }, [selectedMovie?.id, relatedActorsPage, actorsFilter]);
+
+  useEffect(() => {
+    if (selectedMovie) {
+      fetchMovieRatings(selectedMovie.id);
+    }
+  }, [selectedMovie?.id, movieRatingsPage]);
+
+  const filteredMovieRows = movies.filter((movie) => {
     const query = filter.toLowerCase();
     if (!query) {
       return true;
@@ -218,14 +313,7 @@ export default function MoviesPage() {
     );
   });
 
-  const totalPages = Math.max(
-    1,
-    Math.ceil(filteredMovieRows.length / pageSize),
-  );
-
-  const relatedActors = selectedMovie
-    ? movieActors[selectedMovie.id] || []
-    : [];
+  const totalPages = Math.ceil(totalMovies / pageSize);
 
   const filteredActors = relatedActors.filter((actor) => {
     const query = actorsFilter.toLowerCase();
@@ -235,17 +323,13 @@ export default function MoviesPage() {
 
     return (
       actor.name.toLowerCase().includes(query) ||
-      actor.nationality.toLowerCase().includes(query) ||
-      String(actor.age).includes(query)
+      actor.nationality.toLowerCase().includes(query)
     );
   });
 
-  const relatedActorsTotalPages = Math.max(
-    1,
-    Math.ceil(filteredActors.length / relatedDataPageSize),
+  const relatedActorsTotalPages = Math.ceil(
+    totalRelatedActors / relatedDataPageSize,
   );
-
-  const ratings = selectedMovie ? ratingsByMovie[selectedMovie.id] || [] : [];
 
   const filteredRatings = ratings.filter((rating) => {
     const query = ratingsFilter.toLowerCase();
@@ -260,10 +344,7 @@ export default function MoviesPage() {
     );
   });
 
-  const ratingsTotalPages = Math.max(
-    1,
-    Math.ceil(filteredRatings.length / relatedDataPageSize),
-  );
+  const ratingsTotalPages = Math.ceil(totalRatings / relatedDataPageSize);
 
   const pushRouteState = (nextPage: number, nextFilter: string) => {
     const params = new URLSearchParams();
@@ -304,23 +385,59 @@ export default function MoviesPage() {
 
   const handleSaveMovie = async (data: MovieFormData) => {
     try {
-      // TODO: Replace with actual API call
-      // if (movieFormMode === "create") {
-      //   await apiClient.post("/movies", data);
-      // } else {
-      //   await apiClient.patch(`/movies/${editingMovie.id}`, data);
-      //   // Link actors: POST /movies/:movieId/actors/:actorId for each actor
-      // }
+      if (movieFormMode === "create") {
+        const createDto: CreateMovieDto = {
+          title: data.title,
+          description: data.description,
+          releaseYear: data.releaseYear,
+          genre: data.genre,
+        };
+
+        const response = await apiClient.post<MovieDto>("/movies", createDto);
+        const createdMovieId = response.data.id;
+
+        if (data.actorIds && data.actorIds.length > 0) {
+          await Promise.all(
+            data.actorIds.map((actorId) =>
+              apiClient.post(`/movies/${createdMovieId}/actors/${actorId}`),
+            ),
+          );
+        }
+
+        showToast("Movie created successfully!", "success");
+      } else if (editingMovie) {
+        const updateDto: UpdateMovieDto = {
+          title: data.title,
+          description: data.description,
+          releaseYear: data.releaseYear,
+          genre: data.genre,
+        };
+
+        await apiClient.patch(`/movies/${editingMovie.id}`, updateDto);
+
+        if (data.actorIds && data.actorIds.length > 0) {
+          await Promise.all(
+            data.actorIds.map((actorId) =>
+              apiClient.post(`/movies/${editingMovie.id}/actors/${actorId}`),
+            ),
+          );
+        }
+
+        showToast("Movie updated successfully!", "success");
+      }
 
       setIsMovieFormOpen(false);
-      showToast(
-        movieFormMode === "create"
-          ? "Movie created successfully!"
-          : "Movie updated successfully!",
-        "success",
-      );
 
-      // TODO: Refresh movies list
+      await fetchMovies();
+
+      if (
+        movieFormMode === "edit" &&
+        selectedMovie &&
+        editingMovie &&
+        selectedMovie.id === editingMovie.id
+      ) {
+        await fetchMovieActors(editingMovie.id);
+      }
     } catch (error) {
       console.error("Error saving movie:", error);
       showToast("Failed to save movie. Please try again.", "error");
@@ -333,14 +450,19 @@ export default function MoviesPage() {
     }
 
     try {
-      // TODO: Replace with actual API call
-      // await apiClient.delete(`/movies/${deletingMovie.id}`);
+      await apiClient.delete(`/movies/${deletingMovie.id}`);
 
       setIsDeleteModalOpen(false);
       setDeletingMovie(null);
       showToast("Movie deleted successfully!", "success");
 
-      // TODO: Refresh movies list
+      if (selectedMovie?.id === deletingMovie.id) {
+        setSelectedMovie(null);
+        setRelatedActors([]);
+        setRatings([]);
+      }
+
+      await fetchMovies();
     } catch (error) {
       console.error("Error deleting movie:", error);
       showToast("Failed to delete movie. Please try again.", "error");
@@ -356,6 +478,12 @@ export default function MoviesPage() {
     setSelectedMovie(movie);
     setRelatedActorsPage(1);
     setMovieRatingsPage(1);
+    setRelatedActorsCursorByPage({ 1: undefined });
+    setRatingsCursorByPage({ 1: undefined });
+    setRelatedActorsHasNextPage(false);
+    setRelatedActorsHasPreviousPage(false);
+    setRatingsHasNextPage(false);
+    setRatingsHasPreviousPage(false);
   };
 
   const handlePageChange = (nextPage: number) => {
@@ -374,17 +502,32 @@ export default function MoviesPage() {
     setMovieRatingsPage(1);
     setActorsFilter("");
     setRatingsFilter("");
+    setMoviesCursorByPage({ 1: undefined });
+    setMoviesHasNextPage(false);
+    setMoviesHasPreviousPage(false);
+    setRelatedActorsCursorByPage({ 1: undefined });
+    setRelatedActorsHasNextPage(false);
+    setRelatedActorsHasPreviousPage(false);
+    setRatingsCursorByPage({ 1: undefined });
+    setRatingsHasNextPage(false);
+    setRatingsHasPreviousPage(false);
     pushRouteState(1, value);
   };
 
   const handleFilterActors = (value: string) => {
     setActorsFilter(value);
     setRelatedActorsPage(1);
+    setRelatedActorsCursorByPage({ 1: undefined });
+    setRelatedActorsHasNextPage(false);
+    setRelatedActorsHasPreviousPage(false);
   };
 
   const handleFilterRatings = (value: string) => {
     setRatingsFilter(value);
     setMovieRatingsPage(1);
+    setRatingsCursorByPage({ 1: undefined });
+    setRatingsHasNextPage(false);
+    setRatingsHasPreviousPage(false);
   };
 
   const handleAddRating = () => {
@@ -395,7 +538,7 @@ export default function MoviesPage() {
     setIsRatingModalOpen(true);
   };
 
-  const handleSaveRating = (data: {
+  const handleSaveRating = async (data: {
     reviewer: string;
     comment: string;
     rating: number;
@@ -405,26 +548,20 @@ export default function MoviesPage() {
     }
 
     try {
-      setRatingsByMovie((prev) => {
-        const existing = prev[selectedMovie.id] ?? [];
-        const nextId =
-          existing.reduce((max, item) => Math.max(max, item.id), 0) + 1;
-        const nextRating = {
-          id: nextId,
-          rating: data.rating,
-          reviewer: data.reviewer,
-          comment: data.comment,
-        };
+      const createRatingDto = {
+        rating: data.rating,
+        review: data.comment,
+        movieId: selectedMovie.id,
+      };
 
-        return {
-          ...prev,
-          [selectedMovie.id]: [nextRating, ...existing],
-        };
-      });
+      await apiClient.post("/movie-ratings", createRatingDto);
 
-      setMovieRatingsPage(1);
       setIsRatingModalOpen(false);
       showToast("Rating saved successfully!", "success");
+
+      await fetchMovieRatings(selectedMovie.id);
+      setMovieRatingsPage(1);
+      setRatingsCursorByPage({ 1: undefined });
     } catch (error) {
       console.error("Error saving rating:", error);
       showToast("Failed to save rating. Please try again.", "error");
@@ -484,6 +621,8 @@ export default function MoviesPage() {
           page={page}
           pageSize={pageSize}
           totalPages={totalPages}
+          hasPreviousPage={moviesHasPreviousPage}
+          hasNextPage={moviesHasNextPage}
           onPageChange={handlePageChange}
           onUpdate={handleUpdateMovie}
           onDelete={handleDeleteMovie}
@@ -507,6 +646,8 @@ export default function MoviesPage() {
               page={relatedActorsPage}
               pageSize={relatedDataPageSize}
               totalPages={relatedActorsTotalPages}
+              hasPreviousPage={relatedActorsHasPreviousPage}
+              hasNextPage={relatedActorsHasNextPage}
               onPageChange={setRelatedActorsPage}
               onFilter={handleFilterActors}
               filterDebounceMs={1000}
@@ -524,6 +665,8 @@ export default function MoviesPage() {
               page={movieRatingsPage}
               pageSize={relatedDataPageSize}
               totalPages={ratingsTotalPages}
+              hasPreviousPage={ratingsHasPreviousPage}
+              hasNextPage={ratingsHasNextPage}
               onPageChange={setMovieRatingsPage}
               onFilter={handleFilterRatings}
               onAdd={handleAddRating}
@@ -548,10 +691,10 @@ export default function MoviesPage() {
             editingMovie
               ? {
                   title: editingMovie.title,
-                  description: "", // TODO: Add description field to MovieRow
+                  description: editingMovie.description,
                   releaseYear: editingMovie.year,
                   genre: editingMovie.genre,
-                  actorIds: [], // TODO: Get from selected movie's actors
+                  actorIds: relatedActors.map((actor) => actor.id),
                 }
               : undefined
           }

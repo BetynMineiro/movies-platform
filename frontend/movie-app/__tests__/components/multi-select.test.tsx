@@ -87,7 +87,11 @@ describe("MultiSelect", () => {
     );
 
     fireEvent.click(screen.getByText("Choose options"));
-    fireEvent.click(screen.getByText("Option 1"));
+
+    // Get the option from the dropdown (not the chip)
+    const option1Elements = screen.getAllByText("Option 1");
+    // Click the one in the dropdown (should be the last one, as chips come first)
+    fireEvent.click(option1Elements[option1Elements.length - 1]);
 
     expect(onChange).toHaveBeenCalledWith([2]);
   });
