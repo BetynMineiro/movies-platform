@@ -94,6 +94,25 @@ cd frontend/movie-app
 npm run test
 ```
 
+## Automatic Seed
+
+The backend seeds data automatically on application startup (`onModuleInit` in `SeedService`).
+
+What is seeded:
+
+- Default admin user (`admin@example.com` / `Admin@123`)
+- Actors and movies from `backend/movie-api/src/seed/data/seed-data.json`
+- Synthetic movies and ratings generated from the same seed config
+
+Seed behavior:
+
+- Idempotent for existing records (does not duplicate same actor/movie/rating entries)
+- Runs in local execution and in Docker startup
+
+Useful note:
+
+- In local development with SQLite file (`database.sqlite`), deleting the file resets the dataset for a clean re-seed on next startup.
+
 ## Docker Demo Environment
 
 This repository includes a single Docker image that runs:
@@ -162,9 +181,30 @@ docker run --rm -p 3000:3000 -p 3001:3001 movies-platform:local
 
 Workflow file: `.github/workflows/ci.yml`
 
-On push/pull request it runs:
+Triggers:
 
-1. Backend install, build, unit tests, e2e tests
-2. Frontend install, lint, build
-3. Docker image build
-4. Container smoke test (`/health`)
+- `push` to any branch
+- `pull_request`
+
+Pipeline jobs:
+
+1. `backend-tests`
+	- Installs dependencies (`npm ci --legacy-peer-deps`)
+	- Builds backend (`npm run build`)
+	- Runs backend unit tests (`npm run test -- --runInBand`)
+	- Runs backend e2e tests (`npm run test:e2e`)
+
+2. `frontend-tests`
+	- Installs dependencies (`npm ci`)
+	- Runs lint (`npm run lint`)
+	- Builds frontend (`npm run build`)
+
+3. `docker-build` (runs only after both test jobs pass)
+	- Builds Docker image (`docker build -t movies-platform:ci .`)
+	- Runs container on ports `3000` and `3001`
+	- Performs backend smoke check (`curl --fail http://localhost:3000/health`)
+	- Stops and removes test container
+
+Useful note:
+
+- CI is configured with Node.js 20 in all jobs.
