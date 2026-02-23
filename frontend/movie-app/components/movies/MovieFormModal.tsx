@@ -101,7 +101,7 @@ export default function MovieFormModal({
             Movie
           </p>
           <h2 className="text-2xl font-semibold text-stone-900 dark:text-stone-100">
-          {mode === "create" ? "Create New Movie" : "Edit Movie"}
+            {mode === "create" ? "Create New Movie" : "Edit Movie"}
           </h2>
         </div>
 

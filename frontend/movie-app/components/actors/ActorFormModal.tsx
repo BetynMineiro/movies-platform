@@ -89,7 +89,7 @@ export default function ActorFormModal({
             Actor
           </p>
           <h2 className="text-2xl font-semibold text-stone-900 dark:text-stone-100">
-          {mode === "create" ? "Create New Actor" : "Edit Actor"}
+            {mode === "create" ? "Create New Actor" : "Edit Actor"}
           </h2>
         </div>
 
