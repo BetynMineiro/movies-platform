@@ -28,8 +28,8 @@ export default function RootLayout({
       <body
         className={`${spaceGrotesk.variable} ${playfair.variable} antialiased`}
       >
-        <div className="min-h-screen bg-[#f7f1e9] text-stone-900 dark:bg-[#12110f] dark:text-stone-100">
-          {children}
+        <div className="flex min-h-screen flex-col bg-[#f7f1e9] text-stone-900 dark:bg-[#12110f] dark:text-stone-100">
+          <div className="flex-1">{children}</div>
           <div className="mx-auto w-full max-w-6xl px-5 pb-10 sm:px-10 lg:px-12">
             <Footer />
           </div>

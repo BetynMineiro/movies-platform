@@ -34,6 +34,26 @@ export function Home() {
             Health Check
           </Link>
         </div>
+        <div className="mt-6 grid gap-3 sm:grid-cols-2">
+          <Link
+            href="/movies"
+            className="group flex items-center justify-between rounded-2xl border border-stone-200 bg-white/80 px-5 py-4 text-left text-sm font-semibold text-stone-800 shadow-sm transition hover:border-stone-300 dark:border-stone-700 dark:bg-white/5 dark:text-stone-100 dark:hover:border-stone-500"
+          >
+            <span>Movies</span>
+            <span className="text-xs text-stone-500 transition group-hover:text-stone-700 dark:text-stone-400 dark:group-hover:text-stone-200">
+              Explore catalog
+            </span>
+          </Link>
+          <Link
+            href="/actors"
+            className="group flex items-center justify-between rounded-2xl border border-stone-200 bg-white/80 px-5 py-4 text-left text-sm font-semibold text-stone-800 shadow-sm transition hover:border-stone-300 dark:border-stone-700 dark:bg-white/5 dark:text-stone-100 dark:hover:border-stone-500"
+          >
+            <span>Actors</span>
+            <span className="text-xs text-stone-500 transition group-hover:text-stone-700 dark:text-stone-400 dark:group-hover:text-stone-200">
+              Browse talent
+            </span>
+          </Link>
+        </div>
       </div>
     </section>
   );
