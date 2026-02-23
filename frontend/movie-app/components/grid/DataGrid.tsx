@@ -21,6 +21,7 @@ interface DataGridProps<T extends { id: number | string }> {
   totalPages?: number;
   hasPreviousPage?: boolean;
   hasNextPage?: boolean;
+  serverPagination?: boolean;
   onPageChange: (page: number) => void;
   onUpdate?: (row: T) => void;
   onDelete?: (row: T) => void;
@@ -47,6 +48,7 @@ export default function DataGrid<T extends { id: number | string }>({
   totalPages,
   hasPreviousPage,
   hasNextPage,
+  serverPagination = true,
   onPageChange,
   onUpdate,
   onDelete,
@@ -98,7 +100,7 @@ export default function DataGrid<T extends { id: number | string }>({
   const resolvedTotalPages = totalPages ?? computedTotalPages;
   const start = (safePage - 1) * pageSize;
   const end = start + pageSize;
-  const paginatedRows = rows.slice(start, end);
+  const paginatedRows = serverPagination ? rows : rows.slice(start, end);
 
   const canGoPrevious = hasPreviousPage ?? safePage > 1;
   const canGoNext = hasNextPage ?? safePage < resolvedTotalPages;

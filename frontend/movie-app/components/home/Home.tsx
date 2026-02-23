@@ -41,19 +41,19 @@ export function Home() {
         <div className="mt-6 grid gap-3 sm:grid-cols-2">
           <Link
             href="/movies"
-            className="group flex items-center justify-between rounded-2xl border border-stone-200 bg-white/80 px-5 py-4 text-left text-sm font-semibold text-stone-800 shadow-sm transition hover:border-stone-300 dark:border-stone-700 dark:bg-white/5 dark:text-stone-100 dark:hover:border-stone-500"
+            className="group flex items-center justify-between rounded-2xl border border-teal-200 bg-teal-50/80 px-5 py-4 text-left text-sm font-semibold text-teal-900 shadow-sm transition hover:border-teal-300 dark:border-teal-700 dark:bg-teal-900/30 dark:text-teal-100 dark:hover:border-teal-500"
           >
             <span>Movies</span>
-            <span className="text-xs text-stone-500 transition group-hover:text-stone-700 dark:text-stone-400 dark:group-hover:text-stone-200">
+            <span className="text-xs text-teal-500 transition group-hover:text-teal-700 dark:text-teal-300 dark:group-hover:text-teal-100">
               Explore catalog
             </span>
           </Link>
           <Link
             href="/actors"
-            className="group flex items-center justify-between rounded-2xl border border-stone-200 bg-white/80 px-5 py-4 text-left text-sm font-semibold text-stone-800 shadow-sm transition hover:border-stone-300 dark:border-stone-700 dark:bg-white/5 dark:text-stone-100 dark:hover:border-stone-500"
+            className="group flex items-center justify-between rounded-2xl border border-teal-200 bg-teal-50/80 px-5 py-4 text-left text-sm font-semibold text-teal-900 shadow-sm transition hover:border-teal-300 dark:border-teal-700 dark:bg-teal-900/30 dark:text-teal-100 dark:hover:border-teal-500"
           >
             <span>Actors</span>
-            <span className="text-xs text-stone-500 transition group-hover:text-stone-700 dark:text-stone-400 dark:group-hover:text-stone-200">
+            <span className="text-xs text-teal-500 transition group-hover:text-teal-700 dark:text-teal-300 dark:group-hover:text-teal-100">
               Browse talent
             </span>
           </Link>

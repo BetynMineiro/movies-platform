@@ -482,9 +482,6 @@ export default function ActorsPage() {
     setMovieRatingsPage(1);
     setMoviesFilter("");
     setRatingsFilter("");
-    setActorsCursorByPage({ 1: undefined });
-    setActorsHasNextPage(false);
-    setActorsHasPreviousPage(false);
     setRelatedMoviesCursorByPage({ 1: undefined });
     setRelatedMoviesHasNextPage(false);
     setRelatedMoviesHasPreviousPage(false);
