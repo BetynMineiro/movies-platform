@@ -1,0 +1,16 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: movies-platform:local
+    container_name: movies-platform
+    environment:
+      BACKEND_PORT: 3000
+      FRONTEND_PORT: 3001
+      JWT_SECRET: undefined-secret-key
+    ports:
+      - "3000:3000"
+      - "3001:3001"
+    volumes:
+      - ./backend/movie-api/database.sqlite:/app/backend/movie-api/database.sqlite

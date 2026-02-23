@@ -34,3 +34,78 @@ It also includes search and relationship-based navigation, such as:
 ## Note
 
 Detailed technical setup and usage instructions will be added after implementation is complete.
+
+## Docker Demo Environment
+
+This repository includes a single Docker image that runs:
+
+- Backend (NestJS) on port 3000
+- Frontend (Next.js) on port 3001
+- SQLite in the same container (for assessment/demo simplicity)
+
+### Quick Start (Recommended)
+
+From the repository root:
+
+```bash
+docker compose up --build
+```
+
+Run in background:
+
+```bash
+docker compose up -d --build
+```
+
+Stop everything:
+
+```bash
+docker compose down
+```
+
+### Run with Docker Compose
+
+From the repository root:
+
+```bash
+docker compose up --build
+```
+
+Endpoints:
+
+- Backend API: http://localhost:3000
+- Swagger: http://localhost:3000/docs
+- Frontend: http://localhost:3001
+
+### Note about `start-demo.sh`
+
+The file `scripts/start-demo.sh` exists to start and manage **both services in one container**:
+
+- Starts backend (`node dist/main`)
+- Starts frontend (`next start`)
+- Handles signal/cleanup so both processes stop correctly
+
+Where it is used:
+
+- `Dockerfile` uses this script as the container `CMD`
+- `docker compose up` and `docker run` trigger it automatically
+
+You usually do **not** run it manually; it is an internal entrypoint for the demo container.
+
+### Run with Docker only
+
+```bash
+docker build -t movies-platform:local .
+docker run --rm -p 3000:3000 -p 3001:3001 movies-platform:local
+```
+
+## CI with GitHub Actions
+
+Workflow file: `.github/workflows/ci.yml`
+
+On push/pull request it runs:
+
+1. Backend install, build, unit tests, e2e tests
+2. Frontend install, lint, build
+3. Docker image build
+4. Container smoke test (`/health`)

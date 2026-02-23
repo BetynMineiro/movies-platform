@@ -1,0 +1,10 @@
+.git
+.github
+.contexts
+**/node_modules
+**/.next
+**/dist
+**/coverage
+**/.DS_Store
+frontend/movie-app/.next
+backend/movie-api/dist
