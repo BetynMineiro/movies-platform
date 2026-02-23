@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { LogoutButton } from "@/components/auth";
 import AddRatingModal from "@/components/ratings/AddRatingModal";
 import { DataGrid, type DataGridColumn } from "@/components/grid";
+import { useToast } from "@/contexts/ToastContext";
 
 interface MovieRow {
   id: number;
@@ -166,6 +167,7 @@ const ratingColumns: DataGridColumn<RatingRow>[] = [
 
 export default function MoviesPage() {
   const router = useRouter();
+  const { showToast } = useToast();
   const [page, setPage] = useState(1);
   const [filter, setFilter] = useState("");
   const [selectedMovie, setSelectedMovie] = useState<MovieRow | null>(null);
@@ -318,25 +320,31 @@ export default function MoviesPage() {
       return;
     }
 
-    setRatingsByMovie((prev) => {
-      const existing = prev[selectedMovie.id] ?? [];
-      const nextId =
-        existing.reduce((max, item) => Math.max(max, item.id), 0) + 1;
-      const nextRating = {
-        id: nextId,
-        rating: data.rating,
-        reviewer: data.reviewer,
-        comment: data.comment,
-      };
+    try {
+      setRatingsByMovie((prev) => {
+        const existing = prev[selectedMovie.id] ?? [];
+        const nextId =
+          existing.reduce((max, item) => Math.max(max, item.id), 0) + 1;
+        const nextRating = {
+          id: nextId,
+          rating: data.rating,
+          reviewer: data.reviewer,
+          comment: data.comment,
+        };
 
-      return {
-        ...prev,
-        [selectedMovie.id]: [nextRating, ...existing],
-      };
-    });
+        return {
+          ...prev,
+          [selectedMovie.id]: [nextRating, ...existing],
+        };
+      });
 
-    setMovieRatingsPage(1);
-    setIsRatingModalOpen(false);
+      setMovieRatingsPage(1);
+      setIsRatingModalOpen(false);
+      showToast("Rating saved successfully!", "success");
+    } catch (error) {
+      console.error("Error saving rating:", error);
+      showToast("Failed to save rating. Please try again.", "error");
+    }
   };
 
   const handleCancelRating = () => {

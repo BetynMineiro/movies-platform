@@ -9,12 +9,22 @@ jest.mock("../../components/auth", () => ({
   LogoutButton: () => <button>Logout</button>,
 }));
 
+// Mock the ToastContext
+const mockShowToast = jest.fn();
+jest.mock("../../contexts/ToastContext", () => ({
+  useToast: () => ({ showToast: mockShowToast }),
+  ToastProvider: ({ children }: { children: React.ReactNode }) => (
+    <>{children}</>
+  ),
+}));
+
 describe("ActorsPage", () => {
   beforeEach(() => {
     (useRouter as jest.Mock).mockReturnValue({
       push: jest.fn(),
       back: jest.fn(),
     });
+    mockShowToast.mockClear();
   });
 
   it("renders actors grid", () => {
@@ -262,6 +272,10 @@ describe("ActorsPage", () => {
     fireEvent.click(screen.getByRole("button", { name: "Save" }));
 
     expect(screen.getByText("Novo comentario")).toBeInTheDocument();
+    expect(mockShowToast).toHaveBeenCalledWith(
+      "Rating saved successfully!",
+      "success",
+    );
   });
 
   it("does not add rating when modal is canceled", () => {
