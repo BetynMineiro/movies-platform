@@ -14,6 +14,7 @@ interface DataGridProps<T extends { id: number | string }> {
   columns: DataGridColumn<T>[];
   showFilter?: boolean;
   showActions?: boolean;
+  showAdd?: boolean;
   selectedRowId?: number | string | null;
   page: number;
   pageSize: number;
@@ -25,6 +26,7 @@ interface DataGridProps<T extends { id: number | string }> {
   onDelete?: (row: T) => void;
   onSelectedRow?: (row: T) => void;
   onFilter?: (value: string) => void;
+  onAdd?: () => void;
   filterDebounceMs?: number;
   filterPlaceholder?: string;
   initialFilterValue?: string;
@@ -37,6 +39,7 @@ export default function DataGrid<T extends { id: number | string }>({
   columns,
   showFilter = true,
   showActions = true,
+  showAdd = false,
   selectedRowId,
   page,
   pageSize,
@@ -48,7 +51,8 @@ export default function DataGrid<T extends { id: number | string }>({
   onDelete,
   onSelectedRow,
   onFilter,
-  filterDebounceMs = 1000,
+  onAdd,
+  filterDebounceMs = 400,
   filterPlaceholder = "Type to filter...",
   initialFilterValue = "",
   emptyMessage = "No records found.",
@@ -116,15 +120,13 @@ export default function DataGrid<T extends { id: number | string }>({
 
   return (
     <section className="rounded-3xl border border-black/10 bg-white/80 px-6 py-6 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5 sm:px-8">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-stone-200 pb-4 dark:border-stone-700">
-        <div className="flex flex-col gap-1">
-          <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100">
-            {title}
-          </h2>
-          <p className="text-sm text-stone-500 dark:text-stone-400">
-            {rows.length} item(s)
-          </p>
-        </div>
+      <div className="border-b border-stone-200 pb-4 dark:border-stone-700">
+        <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100">
+          {title}
+        </h2>
+      </div>
+
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
         {showFilter ? (
           <input
             type="search"
@@ -134,8 +136,17 @@ export default function DataGrid<T extends { id: number | string }>({
               setFilterValue(event.target.value);
             }}
             placeholder={filterPlaceholder}
-            className="w-full max-w-xs rounded-full border border-stone-300 bg-white px-4 py-2 text-sm text-stone-700 outline-none transition focus:border-stone-400 dark:border-stone-600 dark:bg-stone-900/40 dark:text-stone-200 dark:focus:border-stone-400"
+            className="flex-1 rounded-full border border-stone-300 bg-white px-4 py-2 text-sm text-stone-700 outline-none transition focus:border-stone-400 dark:border-stone-600 dark:bg-stone-900/40 dark:text-stone-200 dark:focus:border-stone-400\"
           />
+        ) : null}
+        {showAdd ? (
+          <button
+            type="button"
+            onClick={onAdd}
+            className="rounded-full border border-green-300 bg-green-50 px-4 py-2 text-sm font-semibold text-green-700 transition hover:border-green-400 hover:bg-green-100 dark:border-green-700 dark:bg-green-900/20 dark:text-green-300 dark:hover:border-green-600 dark:hover:bg-green-900/40"
+          >
+            + Add
+          </button>
         ) : null}
       </div>
 
@@ -227,8 +238,11 @@ export default function DataGrid<T extends { id: number | string }>({
         </table>
       </div>
 
-      <div className="mt-4 flex items-center justify-between gap-3">
+      <div className="relative mt-6 flex items-center justify-between gap-3">
         <p className="text-sm text-stone-500 dark:text-stone-400">
+          {rows.length} item(s)
+        </p>
+        <p className="absolute left-1/2 transform -translate-x-1/2 text-sm text-stone-500 dark:text-stone-400">
           Page {safePage} of {resolvedTotalPages}
         </p>
         <div className="flex gap-2">
