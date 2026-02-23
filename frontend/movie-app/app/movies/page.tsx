@@ -12,6 +12,21 @@ interface MovieRow {
   year: number;
 }
 
+interface ActorRow {
+  id: number;
+  name: string;
+  nationality: string;
+  age: number;
+}
+
+interface RatingRow {
+  id: number;
+  rating: number;
+  reviewer: string;
+  comment: string;
+}
+
+// Mock data for movies
 const movieRows: MovieRow[] = [
   { id: 1, title: "Inception", genre: "Sci-Fi", year: 2010 },
   { id: 2, title: "The Dark Knight", genre: "Action", year: 2008 },
@@ -21,17 +36,147 @@ const movieRows: MovieRow[] = [
   { id: 6, title: "Arrival", genre: "Sci-Fi", year: 2016 },
 ];
 
+// Mock data for actors by movie
+const movieActors: Record<number, ActorRow[]> = {
+  1: [
+    { id: 1, name: "Leonardo DiCaprio", nationality: "USA", age: 51 },
+    { id: 2, name: "Marion Cotillard", nationality: "France", age: 49 },
+    { id: 3, name: "Ellen Page", nationality: "Canada", age: 37 },
+    { id: 5, name: "Cillian Murphy", nationality: "Ireland", age: 50 },
+  ],
+  2: [
+    { id: 1, name: "Leonardo DiCaprio", nationality: "USA", age: 51 },
+    { id: 4, name: "Natalie Portman", nationality: "Israel", age: 45 },
+    { id: 6, name: "Ana de Armas", nationality: "Cuba", age: 38 },
+  ],
+  3: [
+    { id: 1, name: "Leonardo DiCaprio", nationality: "USA", age: 51 },
+    { id: 3, name: "Song Kang-ho", nationality: "South Korea", age: 59 },
+    { id: 5, name: "Cillian Murphy", nationality: "Ireland", age: 50 },
+  ],
+  4: [
+    { id: 3, name: "Song Kang-ho", nationality: "South Korea", age: 59 },
+    { id: 4, name: "Natalie Portman", nationality: "Israel", age: 45 },
+  ],
+  5: [
+    { id: 2, name: "Scarlett Johansson", nationality: "USA", age: 42 },
+    { id: 5, name: "Cillian Murphy", nationality: "Ireland", age: 50 },
+  ],
+  6: [
+    { id: 2, name: "Scarlett Johansson", nationality: "USA", age: 42 },
+    { id: 4, name: "Natalie Portman", nationality: "Israel", age: 45 },
+  ],
+};
+
+// Mock data for ratings by movie
+const movieRatings: Record<number, RatingRow[]> = {
+  1: [
+    {
+      id: 1,
+      rating: 9,
+      reviewer: "John Doe",
+      comment: "Mind-bending masterpiece",
+    },
+    {
+      id: 2,
+      rating: 8,
+      reviewer: "Jane Smith",
+      comment: "Great visual effects",
+    },
+    { id: 3, rating: 9, reviewer: "Bob Johnson", comment: "Excellent plot" },
+    {
+      id: 4,
+      rating: 8,
+      reviewer: "Alice Brown",
+      comment: "Confusing but great",
+    },
+    { id: 5, rating: 7, reviewer: "Charlie Davis", comment: "Good movie" },
+  ],
+  2: [
+    { id: 6, rating: 9, reviewer: "David Lee", comment: "Best Batman movie" },
+    {
+      id: 7,
+      rating: 9,
+      reviewer: "Eve Wilson",
+      comment: "Joker performance is insane",
+    },
+    { id: 8, rating: 8, reviewer: "Frank Miller", comment: "Dark and gritty" },
+  ],
+  3: [
+    {
+      id: 9,
+      rating: 8,
+      reviewer: "Grace Taylor",
+      comment: "Epic space adventure",
+    },
+    {
+      id: 10,
+      rating: 9,
+      reviewer: "Henry White",
+      comment: "Beautiful cinematography",
+    },
+  ],
+  4: [
+    {
+      id: 11,
+      rating: 8,
+      reviewer: "Ivy King",
+      comment: "Sharp social commentary",
+    },
+  ],
+  5: [
+    {
+      id: 12,
+      rating: 9,
+      reviewer: "Jack Thomas",
+      comment: "Intense and brilliant",
+    },
+  ],
+  6: [
+    {
+      id: 13,
+      rating: 7,
+      reviewer: "Karen Harris",
+      comment: "Thought-provoking",
+    },
+    {
+      id: 14,
+      rating: 8,
+      reviewer: "Leo Martin",
+      comment: "Interesting concept",
+    },
+  ],
+};
+
 const movieColumns: DataGridColumn<MovieRow>[] = [
   { key: "title", header: "Title" },
   { key: "genre", header: "Genre" },
   { key: "year", header: "Year" },
 ];
 
+const actorColumns: DataGridColumn<ActorRow>[] = [
+  { key: "name", header: "Name" },
+  { key: "nationality", header: "Nationality" },
+  { key: "age", header: "Age" },
+];
+
+const ratingColumns: DataGridColumn<RatingRow>[] = [
+  { key: "rating", header: "Rating" },
+  { key: "reviewer", header: "Reviewer" },
+  { key: "comment", header: "Comment" },
+];
+
 export default function MoviesPage() {
   const router = useRouter();
   const [page, setPage] = useState(1);
   const [filter, setFilter] = useState("");
+  const [selectedMovie, setSelectedMovie] = useState<MovieRow | null>(null);
+  const [relatedActorsPage, setRelatedActorsPage] = useState(1);
+  const [actorsFilter, setActorsFilter] = useState("");
+  const [movieRatingsPage, setMovieRatingsPage] = useState(1);
+  const [ratingsFilter, setRatingsFilter] = useState("");
   const pageSize = 4;
+  const relatedDataPageSize = 5;
 
   const filteredMovieRows = movieRows.filter((movie) => {
     const query = filter.toLowerCase();
@@ -49,6 +194,48 @@ export default function MoviesPage() {
   const totalPages = Math.max(
     1,
     Math.ceil(filteredMovieRows.length / pageSize),
+  );
+
+  const relatedActors = selectedMovie
+    ? movieActors[selectedMovie.id] || []
+    : [];
+
+  const filteredActors = relatedActors.filter((actor) => {
+    const query = actorsFilter.toLowerCase();
+    if (!query) {
+      return true;
+    }
+
+    return (
+      actor.name.toLowerCase().includes(query) ||
+      actor.nationality.toLowerCase().includes(query) ||
+      String(actor.age).includes(query)
+    );
+  });
+
+  const relatedActorsTotalPages = Math.max(
+    1,
+    Math.ceil(filteredActors.length / relatedDataPageSize),
+  );
+
+  const ratings = selectedMovie ? movieRatings[selectedMovie.id] || [] : [];
+
+  const filteredRatings = ratings.filter((rating) => {
+    const query = ratingsFilter.toLowerCase();
+    if (!query) {
+      return true;
+    }
+
+    return (
+      String(rating.rating).includes(query) ||
+      rating.reviewer.toLowerCase().includes(query) ||
+      rating.comment.toLowerCase().includes(query)
+    );
+  });
+
+  const ratingsTotalPages = Math.max(
+    1,
+    Math.ceil(filteredRatings.length / relatedDataPageSize),
   );
 
   const pushRouteState = (nextPage: number, nextFilter: string) => {
@@ -79,15 +266,39 @@ export default function MoviesPage() {
     router.push(`/movies/${movie.id}/delete`);
   };
 
+  const handleSelectMovie = (movie: MovieRow) => {
+    setSelectedMovie(movie);
+    setRelatedActorsPage(1);
+    setMovieRatingsPage(1);
+  };
+
   const handlePageChange = (nextPage: number) => {
     setPage(nextPage);
+    setSelectedMovie(null);
+    setRelatedActorsPage(1);
+    setMovieRatingsPage(1);
     pushRouteState(nextPage, filter);
   };
 
   const handleFilterMovies = (value: string) => {
     setFilter(value);
     setPage(1);
+    setSelectedMovie(null);
+    setRelatedActorsPage(1);
+    setMovieRatingsPage(1);
+    setActorsFilter("");
+    setRatingsFilter("");
     pushRouteState(1, value);
+  };
+
+  const handleFilterActors = (value: string) => {
+    setActorsFilter(value);
+    setRelatedActorsPage(1);
+  };
+
+  const handleFilterRatings = (value: string) => {
+    setRatingsFilter(value);
+    setMovieRatingsPage(1);
   };
 
   return (
@@ -134,17 +345,54 @@ export default function MoviesPage() {
           columns={movieColumns}
           showFilter
           showActions
+          selectedRowId={selectedMovie?.id}
           page={page}
           pageSize={pageSize}
           totalPages={totalPages}
           onPageChange={handlePageChange}
           onUpdate={handleUpdateMovie}
           onDelete={handleDeleteMovie}
+          onSelectedRow={handleSelectMovie}
           onFilter={handleFilterMovies}
           filterDebounceMs={1000}
           filterPlaceholder="Filter movies..."
           emptyMessage="No movies available."
         />
+
+        {selectedMovie && (
+          <div className="flex flex-col gap-6">
+            <DataGrid
+              title={`Actors in "${selectedMovie.title}"`}
+              rows={filteredActors}
+              columns={actorColumns}
+              showFilter
+              showActions={false}
+              page={relatedActorsPage}
+              pageSize={relatedDataPageSize}
+              totalPages={relatedActorsTotalPages}
+              onPageChange={setRelatedActorsPage}
+              onFilter={handleFilterActors}
+              filterDebounceMs={1000}
+              filterPlaceholder="Filter actors..."
+              emptyMessage="No actors available for this movie."
+            />
+            <DataGrid
+              title={`Ratings for "${selectedMovie.title}"`}
+              rows={filteredRatings}
+              columns={ratingColumns}
+              showFilter
+              showActions={false}
+              page={movieRatingsPage}
+              pageSize={relatedDataPageSize}
+              totalPages={ratingsTotalPages}
+              onPageChange={setMovieRatingsPage}
+              onFilter={handleFilterRatings}
+              filterDebounceMs={1000}
+              filterPlaceholder="Filter ratings..."
+              emptyMessage="No ratings available for this movie."
+            />
+          </div>
+        )}
       </main>
     </div>
   );
