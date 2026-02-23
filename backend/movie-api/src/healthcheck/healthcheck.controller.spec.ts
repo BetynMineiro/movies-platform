@@ -1,4 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { RequestContextService } from '../common/context/request-context.service';
+import { AppLoggerService } from '../common/services/app-logger.service';
 import { HealthcheckController } from './healthcheck.controller';
 import { HealthcheckService } from './healthcheck.service';
 
@@ -8,19 +10,21 @@ describe('HealthcheckController', () => {
   beforeEach(async () => {
     const app: TestingModule = await Test.createTestingModule({
       controllers: [HealthcheckController],
-      providers: [HealthcheckService],
+      providers: [HealthcheckService, RequestContextService, AppLoggerService],
     }).compile();
 
-    healthcheckController = app.get<HealthcheckController>(HealthcheckController);
+    healthcheckController = app.get<HealthcheckController>(
+      HealthcheckController,
+    );
   });
 
   describe('health check', () => {
-    it('should return API health status on default route', () => {
-      expect(healthcheckController.getDefaultHealthcheck()).toEqual({ status: 'ok' });
-    });
-
     it('should return API health status', () => {
-      expect(healthcheckController.getHealthcheck()).toEqual({ status: 'ok' });
+      expect(healthcheckController.getHealthcheck()).toEqual({
+        data: {
+          status: 'ok',
+        },
+      });
     });
   });
 });
