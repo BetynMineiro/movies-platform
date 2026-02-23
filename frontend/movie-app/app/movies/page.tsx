@@ -251,9 +251,9 @@ export default function MoviesPage() {
 
       const ratingRows: RatingRow[] = response.data.data.map((rating) => ({
         id: rating.id,
-        rating: rating.rating,
+        rating: rating.score,
         reviewer: `User ${rating.userId}`,
-        comment: rating.review,
+        comment: rating.comment ?? "",
       }));
 
       const meta = response.data.meta;

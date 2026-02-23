@@ -254,9 +254,9 @@ export default function ActorsPage() {
 
       const ratingRows: RatingRow[] = response.data.data.map((rating) => ({
         id: rating.id,
-        rating: rating.rating,
-        reviewer: `User ${rating.userId}`, // In a real app, fetch user details
-        comment: rating.review,
+        rating: rating.score,
+        reviewer: `User ${rating.userId}`,
+        comment: rating.comment ?? "",
       }));
 
       const meta = response.data.meta;
