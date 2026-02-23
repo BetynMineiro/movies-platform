@@ -35,7 +35,7 @@ interface SyntheticMoviesConfig {
   maxActorsPerMovie?: number;
   ratingsPerMovie?: number;
   genres: string[];
-  ratingComments: string[];
+  ratingComments: SeedRating[];
 }
 
 interface SeedData {
@@ -224,8 +224,7 @@ export class SeedService implements OnModuleInit {
         ratingIndex < Math.max(1, ratingsPerMovie);
         ratingIndex++
       ) {
-        const score = this.randomInt(3, 5, index * 31 + ratingIndex);
-        const commentBase =
+        const ratingTemplate =
           ratingComments[
             this.randomInt(
               0,
@@ -233,10 +232,15 @@ export class SeedService implements OnModuleInit {
               index * 37 + ratingIndex,
             )
           ];
+        const scoreVariance = this.randomInt(-1, 1, index * 31 + ratingIndex);
+        const score = Math.min(
+          10,
+          Math.max(0, ratingTemplate.score + scoreVariance),
+        );
 
         ratings.push({
           score,
-          comment: `${commentBase} (entry ${index}, rating ${ratingIndex + 1})`,
+          comment: ratingTemplate.comment,
         });
       }
 

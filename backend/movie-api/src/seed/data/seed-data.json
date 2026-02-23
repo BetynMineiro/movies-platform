@@ -37,11 +37,14 @@
       "Adventure"
     ],
     "ratingComments": [
-      "Great movie for testing pagination.",
-      "Solid performance from the cast.",
-      "Interesting plot and pacing.",
-      "Good cinematography and soundtrack.",
-      "A reliable entry in the catalog."
+      { "score": 9, "comment": "Outstanding pacing and strong direction." },
+      { "score": 8, "comment": "Polished visuals with a memorable score." },
+      { "score": 7, "comment": "Good performances elevate the story." },
+      { "score": 6, "comment": "Solid entry with a few slow moments." },
+      { "score": 8, "comment": "Engaging plot with satisfying payoff." },
+      { "score": 7, "comment": "Well-crafted and easy to recommend." },
+      { "score": 5, "comment": "Interesting ideas, uneven execution." },
+      { "score": 8, "comment": "Great chemistry and strong set pieces." }
     ]
   }
 }
