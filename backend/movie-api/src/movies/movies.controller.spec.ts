@@ -49,7 +49,14 @@ describe('MoviesController', () => {
     it('should return paginated movies', async () => {
       const paginatedResponse = {
         data: [mockMovie],
-        meta: { limit: 10, hasNext: false },
+        meta: {
+          total: 1,
+          limit: 10,
+          totalPages: 1,
+          hasPreviousPage: false,
+          hasNextPage: false,
+          hasNext: false,
+        },
       };
 
       service.findAll.mockResolvedValue(paginatedResponse);

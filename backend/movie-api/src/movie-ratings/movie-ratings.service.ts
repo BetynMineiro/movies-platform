@@ -28,6 +28,18 @@ export class MovieRatingsService {
       filter: { movieId, limit, cursor },
     });
 
+    const totalQueryBuilder = this.ratingsRepository
+      .createQueryBuilder('rating')
+      .leftJoinAndSelect('rating.movie', 'movie')
+      .orderBy('rating.id', 'DESC');
+
+    if (movieId) {
+      totalQueryBuilder.andWhere('rating.movieId = :movieId', { movieId });
+    }
+
+    const total = await totalQueryBuilder.getCount();
+    const totalPages = Math.max(1, Math.ceil(total / limit));
+
     const queryBuilder = this.ratingsRepository
       .createQueryBuilder('rating')
       .leftJoinAndSelect('rating.movie', 'movie')
@@ -46,17 +58,26 @@ export class MovieRatingsService {
     const hasNext = ratings.length > limit;
     const data = hasNext ? ratings.slice(0, limit) : ratings;
     const nextCursor = hasNext ? data[data.length - 1].id : undefined;
+    const hasPreviousPage = Boolean(cursor);
+    const hasNextPage = hasNext;
 
     this.logger.log('Movie ratings found', 'MovieRatingsService', {
       count: data.length,
       hasNext,
+      hasPreviousPage,
+      hasNextPage,
+      totalPages,
       nextCursor,
     });
 
     return {
       data,
       meta: {
+        total,
         limit,
+        totalPages,
+        hasPreviousPage,
+        hasNextPage,
         hasNext,
         nextCursor,
       },

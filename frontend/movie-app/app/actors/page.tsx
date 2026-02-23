@@ -1,10 +1,66 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { LogoutButton } from "@/components/auth";
+import { DataGrid, type DataGridColumn } from "@/components/grid";
+
+interface ActorRow {
+  id: number;
+  name: string;
+  nationality: string;
+  age: number;
+}
+
+const actorRows: ActorRow[] = [
+  { id: 1, name: "Leonardo DiCaprio", nationality: "USA", age: 51 },
+  { id: 2, name: "Scarlett Johansson", nationality: "USA", age: 42 },
+  { id: 3, name: "Song Kang-ho", nationality: "South Korea", age: 59 },
+  { id: 4, name: "Natalie Portman", nationality: "Israel", age: 45 },
+  { id: 5, name: "Cillian Murphy", nationality: "Ireland", age: 50 },
+  { id: 6, name: "Ana de Armas", nationality: "Cuba", age: 38 },
+];
+
+const actorColumns: DataGridColumn<ActorRow>[] = [
+  { key: "name", header: "Name" },
+  { key: "nationality", header: "Nationality" },
+  { key: "age", header: "Age" },
+];
 
 export default function ActorsPage() {
   const router = useRouter();
+  const [page, setPage] = useState(1);
+  const [filter, setFilter] = useState("");
+  const pageSize = 4;
+
+  const filteredActorRows = actorRows.filter((actor) => {
+    const query = filter.toLowerCase();
+    if (!query) {
+      return true;
+    }
+
+    return (
+      actor.name.toLowerCase().includes(query) ||
+      actor.nationality.toLowerCase().includes(query) ||
+      String(actor.age).includes(query)
+    );
+  });
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredActorRows.length / pageSize),
+  );
+
+  const pushRouteState = (nextPage: number, nextFilter: string) => {
+    const params = new URLSearchParams();
+    params.set("page", String(nextPage));
+
+    if (nextFilter) {
+      params.set("filter", nextFilter);
+    }
+
+    router.push(`/actors?${params.toString()}`);
+  };
 
   const handleBack = () => {
     if (typeof window !== "undefined" && window.history.length > 1) {
@@ -13,6 +69,25 @@ export default function ActorsPage() {
     }
 
     router.push("/");
+  };
+
+  const handleUpdateActor = (actor: ActorRow) => {
+    router.push(`/actors/${actor.id}/update`);
+  };
+
+  const handleDeleteActor = (actor: ActorRow) => {
+    router.push(`/actors/${actor.id}/delete`);
+  };
+
+  const handlePageChange = (nextPage: number) => {
+    setPage(nextPage);
+    pushRouteState(nextPage, filter);
+  };
+
+  const handleFilterActors = (value: string) => {
+    setFilter(value);
+    setPage(1);
+    pushRouteState(1, value);
   };
 
   return (
@@ -43,6 +118,23 @@ export default function ActorsPage() {
             </p>
           </div>
         </section>
+        <DataGrid
+          title="Actors Grid"
+          rows={filteredActorRows}
+          columns={actorColumns}
+          showFilter
+          showActions
+          page={page}
+          pageSize={pageSize}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+          onUpdate={handleUpdateActor}
+          onDelete={handleDeleteActor}
+          onFilter={handleFilterActors}
+          filterDebounceMs={1000}
+          filterPlaceholder="Filter actors..."
+          emptyMessage="No actors available."
+        />
       </main>
     </div>
   );

@@ -1,10 +1,66 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { LogoutButton } from "@/components/auth";
+import { DataGrid, type DataGridColumn } from "@/components/grid";
+
+interface MovieRow {
+  id: number;
+  title: string;
+  genre: string;
+  year: number;
+}
+
+const movieRows: MovieRow[] = [
+  { id: 1, title: "Inception", genre: "Sci-Fi", year: 2010 },
+  { id: 2, title: "The Dark Knight", genre: "Action", year: 2008 },
+  { id: 3, title: "Interstellar", genre: "Sci-Fi", year: 2014 },
+  { id: 4, title: "Parasite", genre: "Drama", year: 2019 },
+  { id: 5, title: "Whiplash", genre: "Drama", year: 2014 },
+  { id: 6, title: "Arrival", genre: "Sci-Fi", year: 2016 },
+];
+
+const movieColumns: DataGridColumn<MovieRow>[] = [
+  { key: "title", header: "Title" },
+  { key: "genre", header: "Genre" },
+  { key: "year", header: "Year" },
+];
 
 export default function MoviesPage() {
   const router = useRouter();
+  const [page, setPage] = useState(1);
+  const [filter, setFilter] = useState("");
+  const pageSize = 4;
+
+  const filteredMovieRows = movieRows.filter((movie) => {
+    const query = filter.toLowerCase();
+    if (!query) {
+      return true;
+    }
+
+    return (
+      movie.title.toLowerCase().includes(query) ||
+      movie.genre.toLowerCase().includes(query) ||
+      String(movie.year).includes(query)
+    );
+  });
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredMovieRows.length / pageSize),
+  );
+
+  const pushRouteState = (nextPage: number, nextFilter: string) => {
+    const params = new URLSearchParams();
+    params.set("page", String(nextPage));
+
+    if (nextFilter) {
+      params.set("filter", nextFilter);
+    }
+
+    router.push(`/movies?${params.toString()}`);
+  };
 
   const handleBack = () => {
     if (typeof window !== "undefined" && window.history.length > 1) {
@@ -13,6 +69,25 @@ export default function MoviesPage() {
     }
 
     router.push("/");
+  };
+
+  const handleUpdateMovie = (movie: MovieRow) => {
+    router.push(`/movies/${movie.id}/update`);
+  };
+
+  const handleDeleteMovie = (movie: MovieRow) => {
+    router.push(`/movies/${movie.id}/delete`);
+  };
+
+  const handlePageChange = (nextPage: number) => {
+    setPage(nextPage);
+    pushRouteState(nextPage, filter);
+  };
+
+  const handleFilterMovies = (value: string) => {
+    setFilter(value);
+    setPage(1);
+    pushRouteState(1, value);
   };
 
   return (
@@ -44,6 +119,23 @@ export default function MoviesPage() {
             </p>
           </div>
         </section>
+        <DataGrid
+          title="Movies Grid"
+          rows={filteredMovieRows}
+          columns={movieColumns}
+          showFilter
+          showActions
+          page={page}
+          pageSize={pageSize}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+          onUpdate={handleUpdateMovie}
+          onDelete={handleDeleteMovie}
+          onFilter={handleFilterMovies}
+          filterDebounceMs={1000}
+          filterPlaceholder="Filter movies..."
+          emptyMessage="No movies available."
+        />
       </main>
     </div>
   );

@@ -7,6 +7,15 @@ export class PaginationMetaDto {
   @ApiProperty({ example: 10 })
   limit: number;
 
+  @ApiPropertyOptional({ example: 5 })
+  totalPages?: number;
+
+  @ApiProperty({ example: false })
+  hasPreviousPage: boolean;
+
+  @ApiProperty({ example: true })
+  hasNextPage: boolean;
+
   @ApiProperty({ example: true })
   hasNext: boolean;
 

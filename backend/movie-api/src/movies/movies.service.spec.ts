@@ -68,7 +68,12 @@ describe('MoviesService', () => {
   describe('findAll', () => {
     it('should return paginated movies without filter', async () => {
       const movies = [mockMovie];
-      const queryBuilder = {
+      const totalQueryBuilder = {
+        orderBy: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        getCount: jest.fn().mockResolvedValue(1),
+      };
+      const dataQueryBuilder = {
         orderBy: jest.fn().mockReturnThis(),
         addOrderBy: jest.fn().mockReturnThis(),
         take: jest.fn().mockReturnThis(),
@@ -76,16 +81,20 @@ describe('MoviesService', () => {
         getMany: jest.fn().mockResolvedValue(movies),
       };
 
-      (repository.createQueryBuilder as jest.Mock).mockReturnValue(
-        queryBuilder,
-      );
+      (repository.createQueryBuilder as jest.Mock)
+        .mockReturnValueOnce(totalQueryBuilder)
+        .mockReturnValueOnce(dataQueryBuilder);
 
       const query: QueryMoviesDto = { limit: 10 };
       const result = await service.findAll(query);
 
       expect(result.data).toEqual(movies);
       expect(result.meta).toEqual({
+        total: 1,
         limit: 10,
+        totalPages: 1,
+        hasPreviousPage: false,
+        hasNextPage: false,
         hasNext: false,
         nextCursor: undefined,
       });
@@ -93,7 +102,12 @@ describe('MoviesService', () => {
 
     it('should return paginated movies with title filter', async () => {
       const movies = [mockMovie];
-      const queryBuilder = {
+      const totalQueryBuilder = {
+        orderBy: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        getCount: jest.fn().mockResolvedValue(1),
+      };
+      const dataQueryBuilder = {
         orderBy: jest.fn().mockReturnThis(),
         addOrderBy: jest.fn().mockReturnThis(),
         take: jest.fn().mockReturnThis(),
@@ -101,14 +115,14 @@ describe('MoviesService', () => {
         getMany: jest.fn().mockResolvedValue(movies),
       };
 
-      (repository.createQueryBuilder as jest.Mock).mockReturnValue(
-        queryBuilder,
-      );
+      (repository.createQueryBuilder as jest.Mock)
+        .mockReturnValueOnce(totalQueryBuilder)
+        .mockReturnValueOnce(dataQueryBuilder);
 
       const query: QueryMoviesDto = { title: 'Test', limit: 10 };
       await service.findAll(query);
 
-      expect(queryBuilder.andWhere).toHaveBeenCalledWith(
+      expect(dataQueryBuilder.andWhere).toHaveBeenCalledWith(
         'movie.title LIKE :title',
         { title: '%Test%' },
       );
@@ -117,7 +131,12 @@ describe('MoviesService', () => {
     it('should return movies with cursor for next page', async () => {
       const movie2 = { ...mockMovie, id: 2, title: 'Movie 2' };
       const movies = [mockMovie, movie2];
-      const queryBuilder = {
+      const totalQueryBuilder = {
+        orderBy: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        getCount: jest.fn().mockResolvedValue(2),
+      };
+      const dataQueryBuilder = {
         orderBy: jest.fn().mockReturnThis(),
         addOrderBy: jest.fn().mockReturnThis(),
         take: jest.fn().mockReturnThis(),
@@ -125,14 +144,17 @@ describe('MoviesService', () => {
         getMany: jest.fn().mockResolvedValue(movies),
       };
 
-      (repository.createQueryBuilder as jest.Mock).mockReturnValue(
-        queryBuilder,
-      );
+      (repository.createQueryBuilder as jest.Mock)
+        .mockReturnValueOnce(totalQueryBuilder)
+        .mockReturnValueOnce(dataQueryBuilder);
 
       const query: QueryMoviesDto = { limit: 1 };
       const result = await service.findAll(query);
 
       expect(result.meta?.hasNext).toBe(true);
+      expect(result.meta?.hasNextPage).toBe(true);
+      expect(result.meta?.hasPreviousPage).toBe(false);
+      expect(result.meta?.totalPages).toBe(2);
       expect(result.meta?.nextCursor).toBe(1);
     });
   });

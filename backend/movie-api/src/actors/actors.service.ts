@@ -25,6 +25,19 @@ export class ActorsService {
       filter: { name, limit, cursor },
     });
 
+    const totalQueryBuilder = this.actorsRepository
+      .createQueryBuilder('actor')
+      .orderBy('actor.id', 'DESC');
+
+    if (name) {
+      totalQueryBuilder.andWhere('actor.name LIKE :name', {
+        name: `%${name}%`,
+      });
+    }
+
+    const total = await totalQueryBuilder.getCount();
+    const totalPages = Math.max(1, Math.ceil(total / limit));
+
     const queryBuilder = this.actorsRepository
       .createQueryBuilder('actor')
       .orderBy('actor.id', 'DESC')
@@ -44,17 +57,26 @@ export class ActorsService {
     const hasNext = actors.length > limit;
     const data = hasNext ? actors.slice(0, limit) : actors;
     const nextCursor = hasNext ? data[data.length - 1].id : undefined;
+    const hasPreviousPage = Boolean(cursor);
+    const hasNextPage = hasNext;
 
     this.logger.log('Actors found', 'ActorsService', {
       count: data.length,
       hasNext,
+      hasPreviousPage,
+      hasNextPage,
+      totalPages,
       nextCursor,
     });
 
     return {
       data,
       meta: {
+        total,
         limit,
+        totalPages,
+        hasPreviousPage,
+        hasNextPage,
         hasNext,
         nextCursor,
       },
@@ -153,7 +175,7 @@ export class ActorsService {
     }
 
     const normalizedTitle = title?.trim().toLowerCase();
-    const filteredMovies = (actor.movies ?? [])
+    const sortedFilteredMovies = (actor.movies ?? [])
       .filter((movie) => {
         if (!normalizedTitle) {
           return true;
@@ -161,17 +183,29 @@ export class ActorsService {
 
         return movie.title.toLowerCase().includes(normalizedTitle);
       })
-      .sort((first, second) => second.id - first.id)
-      .filter((movie) => (cursor ? movie.id < cursor : true));
+      .sort((first, second) => second.id - first.id);
+
+    const total = sortedFilteredMovies.length;
+    const totalPages = Math.max(1, Math.ceil(total / limit));
+
+    const filteredMovies = sortedFilteredMovies.filter((movie) =>
+      cursor ? movie.id < cursor : true,
+    );
 
     const hasNext = filteredMovies.length > limit;
     const data = hasNext ? filteredMovies.slice(0, limit) : filteredMovies;
     const nextCursor = hasNext ? data[data.length - 1].id : undefined;
+    const hasPreviousPage = Boolean(cursor);
+    const hasNextPage = hasNext;
 
     return {
       data,
       meta: {
+        total,
         limit,
+        totalPages,
+        hasPreviousPage,
+        hasNextPage,
         hasNext,
         nextCursor,
       },
