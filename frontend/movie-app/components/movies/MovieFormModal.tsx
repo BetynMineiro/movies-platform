@@ -87,27 +87,39 @@ export default function MovieFormModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/50 backdrop-blur-sm p-4">
-      <div className="h-[50vh] w-full max-w-5xl overflow-y-auto rounded-3xl bg-[#f7f1e9] p-8 shadow-xl dark:bg-[#1a1916]">
-        <h2 className="mb-6 font-display text-3xl font-bold text-stone-900 dark:text-stone-100">
+    <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+      <div
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+        onClick={onCancel}
+        role="button"
+        tabIndex={-1}
+        aria-label="Close modal"
+      />
+      <div className="relative w-full max-w-lg rounded-3xl border border-stone-200 bg-white p-6 shadow-xl dark:border-stone-700 dark:bg-stone-950">
+        <div className="flex flex-col gap-1">
+          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-stone-400">
+            Movie
+          </p>
+          <h2 className="text-2xl font-semibold text-stone-900 dark:text-stone-100">
           {mode === "create" ? "Create New Movie" : "Edit Movie"}
-        </h2>
+          </h2>
+        </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           {/* Title */}
           <div>
-            <label className="mb-2 block text-sm font-semibold text-stone-700 dark:text-stone-300">
+            <label className="mb-2 block text-sm font-semibold text-stone-700 dark:text-stone-200">
               Title *
             </label>
             <input
               type="text"
               value={formData.title}
               onChange={(e) => handleChange("title", e.target.value)}
-              className={`w-full rounded-2xl border px-4 py-2 transition focus:outline-none ${
+              className={`w-full rounded-2xl border px-4 py-2 text-sm text-stone-700 outline-none transition dark:text-stone-200 ${
                 errors.title
                   ? "border-red-500"
-                  : "border-stone-300 focus:border-stone-500 dark:border-stone-600"
-              } bg-white dark:bg-stone-800`}
+                  : "border-stone-300 focus:border-stone-400 dark:border-stone-700 dark:focus:border-stone-500"
+              } bg-white dark:bg-stone-900/40`}
               placeholder="Enter movie title"
             />
             {errors.title && (
@@ -119,18 +131,18 @@ export default function MovieFormModal({
 
           {/* Description */}
           <div>
-            <label className="mb-2 block text-sm font-semibold text-stone-700 dark:text-stone-300">
+            <label className="mb-2 block text-sm font-semibold text-stone-700 dark:text-stone-200">
               Description *
             </label>
             <textarea
               value={formData.description}
               onChange={(e) => handleChange("description", e.target.value)}
               rows={4}
-              className={`w-full rounded-2xl border px-4 py-2 transition focus:outline-none ${
+              className={`w-full rounded-2xl border px-4 py-2 text-sm text-stone-700 outline-none transition dark:text-stone-200 ${
                 errors.description
                   ? "border-red-500"
-                  : "border-stone-300 focus:border-stone-500 dark:border-stone-600"
-              } bg-white dark:bg-stone-800`}
+                  : "border-stone-300 focus:border-stone-400 dark:border-stone-700 dark:focus:border-stone-500"
+              } bg-white dark:bg-stone-900/40`}
               placeholder="Enter movie description (min. 10 characters)"
             />
             {errors.description && (
@@ -142,7 +154,7 @@ export default function MovieFormModal({
 
           {/* Release Year */}
           <div>
-            <label className="mb-2 block text-sm font-semibold text-stone-700 dark:text-stone-300">
+            <label className="mb-2 block text-sm font-semibold text-stone-700 dark:text-stone-200">
               Release Year *
             </label>
             <input
@@ -151,11 +163,11 @@ export default function MovieFormModal({
               onChange={(e) =>
                 handleChange("releaseYear", parseInt(e.target.value, 10) || 0)
               }
-              className={`w-full rounded-2xl border px-4 py-2 transition focus:outline-none ${
+              className={`w-full rounded-2xl border px-4 py-2 text-sm text-stone-700 outline-none transition dark:text-stone-200 ${
                 errors.releaseYear
                   ? "border-red-500"
-                  : "border-stone-300 focus:border-stone-500 dark:border-stone-600"
-              } bg-white dark:bg-stone-800`}
+                  : "border-stone-300 focus:border-stone-400 dark:border-stone-700 dark:focus:border-stone-500"
+              } bg-white dark:bg-stone-900/40`}
               placeholder="Enter release year"
             />
             {errors.releaseYear && (
@@ -167,18 +179,18 @@ export default function MovieFormModal({
 
           {/* Genre */}
           <div>
-            <label className="mb-2 block text-sm font-semibold text-stone-700 dark:text-stone-300">
+            <label className="mb-2 block text-sm font-semibold text-stone-700 dark:text-stone-200">
               Genre *
             </label>
             <input
               type="text"
               value={formData.genre}
               onChange={(e) => handleChange("genre", e.target.value)}
-              className={`w-full rounded-2xl border px-4 py-2 transition focus:outline-none ${
+              className={`w-full rounded-2xl border px-4 py-2 text-sm text-stone-700 outline-none transition dark:text-stone-200 ${
                 errors.genre
                   ? "border-red-500"
-                  : "border-stone-300 focus:border-stone-500 dark:border-stone-600"
-              } bg-white dark:bg-stone-800`}
+                  : "border-stone-300 focus:border-stone-400 dark:border-stone-700 dark:focus:border-stone-500"
+              } bg-white dark:bg-stone-900/40`}
               placeholder="Enter genre"
             />
             {errors.genre && (
@@ -199,17 +211,17 @@ export default function MovieFormModal({
           />
 
           {/* Actions */}
-          <div className="flex gap-3 pt-4">
+          <div className="mt-6 flex items-center justify-end gap-3">
             <button
               type="button"
               onClick={onCancel}
-              className="flex-1 rounded-2xl border border-stone-300 bg-transparent px-4 py-2 font-semibold text-stone-700 transition hover:bg-stone-100 dark:border-stone-600 dark:text-stone-300 dark:hover:bg-stone-800"
+              className="rounded-full border border-stone-300 px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-stone-700 transition hover:border-stone-400 dark:border-stone-600 dark:text-stone-200 dark:hover:border-stone-400"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="flex-1 rounded-2xl bg-stone-900 px-4 py-2 font-semibold text-white transition hover:bg-stone-800 dark:bg-stone-100 dark:text-stone-900 dark:hover:bg-stone-200"
+              className="rounded-full border border-green-300 bg-green-50 px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-green-700 transition hover:border-green-400 hover:bg-green-100 dark:border-green-700 dark:bg-green-900/20 dark:text-green-300 dark:hover:border-green-600 dark:hover:bg-green-900/40"
             >
               {mode === "create" ? "Create" : "Save"}
             </button>

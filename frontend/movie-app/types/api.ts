@@ -1,4 +1,3 @@
-
 export interface MovieDto {
   id: number;
   title: string;
@@ -57,7 +56,7 @@ export interface CreateActorDto {
 export type UpdateActorDto = Partial<CreateActorDto>;
 
 export interface CreateRatingDto {
-  rating: number;
-  review: string;
+  score: number;
+  comment?: string;
   movieId: number;
 }

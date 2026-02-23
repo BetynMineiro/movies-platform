@@ -549,8 +549,8 @@ export default function MoviesPage() {
 
     try {
       const createRatingDto = {
-        rating: data.rating,
-        review: data.comment,
+        score: data.rating,
+        comment: data.comment,
         movieId: selectedMovie.id,
       };
 

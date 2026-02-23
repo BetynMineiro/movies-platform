@@ -115,7 +115,7 @@ export default function MultiSelect({
             />
           </div>
 
-          <div className="max-h-[450px] overflow-y-auto">
+          <div className="max-h-[280px] overflow-y-auto">
             {loading ? (
               <div className="px-4 py-3 text-center text-sm text-stone-500 dark:text-stone-400">
                 Loading...
