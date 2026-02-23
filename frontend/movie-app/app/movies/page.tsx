@@ -6,6 +6,9 @@ import { LogoutButton } from "@/components/auth";
 import AddRatingModal from "@/components/ratings/AddRatingModal";
 import { DataGrid, type DataGridColumn } from "@/components/grid";
 import { useToast } from "@/contexts/ToastContext";
+import { ConfirmDeleteModal } from "@/components/common";
+import { MovieFormModal, type MovieFormData } from "@/components/movies";
+import type { MultiSelectOption } from "@/components/common";
 
 interface MovieRow {
   id: number;
@@ -177,8 +180,30 @@ export default function MoviesPage() {
   const [ratingsFilter, setRatingsFilter] = useState("");
   const [ratingsByMovie, setRatingsByMovie] = useState(movieRatings);
   const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
+
+  // Movie CRUD modals
+  const [isMovieFormOpen, setIsMovieFormOpen] = useState(false);
+  const [movieFormMode, setMovieFormMode] = useState<"create" | "edit">(
+    "create",
+  );
+  const [editingMovie, setEditingMovie] = useState<MovieRow | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deletingMovie, setDeletingMovie] = useState<MovieRow | null>(null);
+
   const pageSize = 4;
   const relatedDataPageSize = 5;
+
+  // Mock available actors for multiselect (in real app, fetch from API with large page size)
+  const availableActors: MultiSelectOption[] = [
+    { id: 1, label: "Leonardo DiCaprio" },
+    { id: 2, label: "Marion Cotillard" },
+    { id: 3, label: "Ellen Page" },
+    { id: 4, label: "Natalie Portman" },
+    { id: 5, label: "Cillian Murphy" },
+    { id: 6, label: "Ana de Armas" },
+    { id: 7, label: "Song Kang-ho" },
+    { id: 8, label: "Scarlett Johansson" },
+  ];
 
   const filteredMovieRows = movieRows.filter((movie) => {
     const query = filter.toLowerCase();
@@ -260,12 +285,71 @@ export default function MoviesPage() {
     router.push("/");
   };
 
+  const handleCreateMovie = () => {
+    setMovieFormMode("create");
+    setEditingMovie(null);
+    setIsMovieFormOpen(true);
+  };
+
   const handleUpdateMovie = (movie: MovieRow) => {
-    router.push(`/movies/${movie.id}/update`);
+    setMovieFormMode("edit");
+    setEditingMovie(movie);
+    setIsMovieFormOpen(true);
   };
 
   const handleDeleteMovie = (movie: MovieRow) => {
-    router.push(`/movies/${movie.id}/delete`);
+    setDeletingMovie(movie);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleSaveMovie = async (data: MovieFormData) => {
+    try {
+      // TODO: Replace with actual API call
+      // if (movieFormMode === "create") {
+      //   await apiClient.post("/movies", data);
+      // } else {
+      //   await apiClient.patch(`/movies/${editingMovie.id}`, data);
+      //   // Link actors: POST /movies/:movieId/actors/:actorId for each actor
+      // }
+
+      setIsMovieFormOpen(false);
+      showToast(
+        movieFormMode === "create"
+          ? "Movie created successfully!"
+          : "Movie updated successfully!",
+        "success",
+      );
+
+      // TODO: Refresh movies list
+    } catch (error) {
+      console.error("Error saving movie:", error);
+      showToast("Failed to save movie. Please try again.", "error");
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deletingMovie) {
+      return;
+    }
+
+    try {
+      // TODO: Replace with actual API call
+      // await apiClient.delete(`/movies/${deletingMovie.id}`);
+
+      setIsDeleteModalOpen(false);
+      setDeletingMovie(null);
+      showToast("Movie deleted successfully!", "success");
+
+      // TODO: Refresh movies list
+    } catch (error) {
+      console.error("Error deleting movie:", error);
+      showToast("Failed to delete movie. Please try again.", "error");
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setIsDeleteModalOpen(false);
+    setDeletingMovie(null);
   };
 
   const handleSelectMovie = (movie: MovieRow) => {
@@ -395,6 +479,7 @@ export default function MoviesPage() {
           columns={movieColumns}
           showFilter
           showActions
+          showAdd
           selectedRowId={selectedMovie?.id}
           page={page}
           pageSize={pageSize}
@@ -404,6 +489,7 @@ export default function MoviesPage() {
           onDelete={handleDeleteMovie}
           onSelectedRow={handleSelectMovie}
           onFilter={handleFilterMovies}
+          onAdd={handleCreateMovie}
           filterDebounceMs={1000}
           filterPlaceholder="Filter movies..."
           emptyMessage="No movies available."
@@ -452,6 +538,34 @@ export default function MoviesPage() {
           movieTitle={selectedMovie?.title}
           onSave={handleSaveRating}
           onCancel={handleCancelRating}
+        />
+
+        <MovieFormModal
+          key={`${movieFormMode}-${editingMovie?.id || "new"}`}
+          isOpen={isMovieFormOpen}
+          mode={movieFormMode}
+          initialData={
+            editingMovie
+              ? {
+                  title: editingMovie.title,
+                  description: "", // TODO: Add description field to MovieRow
+                  releaseYear: editingMovie.year,
+                  genre: editingMovie.genre,
+                  actorIds: [], // TODO: Get from selected movie's actors
+                }
+              : undefined
+          }
+          availableActors={availableActors}
+          onSave={handleSaveMovie}
+          onCancel={() => setIsMovieFormOpen(false)}
+        />
+
+        <ConfirmDeleteModal
+          isOpen={isDeleteModalOpen}
+          title="Delete Movie"
+          message={`Are you sure you want to delete "${deletingMovie?.title}"? This action cannot be undone.`}
+          onConfirm={handleConfirmDelete}
+          onCancel={handleCancelDelete}
         />
       </main>
     </div>

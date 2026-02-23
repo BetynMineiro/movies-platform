@@ -6,6 +6,9 @@ import { LogoutButton } from "@/components/auth";
 import AddRatingModal from "@/components/ratings/AddRatingModal";
 import { DataGrid, type DataGridColumn } from "@/components/grid";
 import { useToast } from "@/contexts/ToastContext";
+import { ConfirmDeleteModal } from "@/components/common";
+import { ActorFormModal, type ActorFormData } from "@/components/actors";
+import type { MultiSelectOption } from "@/components/common";
 
 interface ActorRow {
   id: number;
@@ -176,8 +179,28 @@ export default function ActorsPage() {
   const [ratingsFilter, setRatingsFilter] = useState("");
   const [ratingsByMovie, setRatingsByMovie] = useState(movieRatings);
   const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
+
+  // Actor CRUD modals
+  const [isActorFormOpen, setIsActorFormOpen] = useState(false);
+  const [actorFormMode, setActorFormMode] = useState<"create" | "edit">(
+    "create",
+  );
+  const [editingActor, setEditingActor] = useState<ActorRow | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deletingActor, setDeletingActor] = useState<ActorRow | null>(null);
+
   const pageSize = 4;
   const relatedDataPageSize = 5;
+
+  // Mock available movies for multiselect (in real app, fetch from API with large page size)
+  const availableMovies: MultiSelectOption[] = [
+    { id: 1, label: "Inception" },
+    { id: 2, label: "The Dark Knight" },
+    { id: 3, label: "Interstellar" },
+    { id: 4, label: "Parasite" },
+    { id: 5, label: "Whiplash" },
+    { id: 6, label: "Arrival" },
+  ];
 
   const filteredActorRows = actorRows.filter((actor) => {
     const query = filter.toLowerCase();
@@ -259,12 +282,70 @@ export default function ActorsPage() {
     router.push("/");
   };
 
+  const handleCreateActor = () => {
+    setActorFormMode("create");
+    setEditingActor(null);
+    setIsActorFormOpen(true);
+  };
+
   const handleUpdateActor = (actor: ActorRow) => {
-    router.push(`/actors/${actor.id}/update`);
+    setActorFormMode("edit");
+    setEditingActor(actor);
+    setIsActorFormOpen(true);
   };
 
   const handleDeleteActor = (actor: ActorRow) => {
-    router.push(`/actors/${actor.id}/delete`);
+    setDeletingActor(actor);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleSaveActor = async (data: ActorFormData) => {
+    try {
+      // TODO: Replace with actual API call
+      // if (actorFormMode === "create") {
+      //   await apiClient.post("/actors", data);
+      // } else {
+      //   await apiClient.patch(`/actors/${editingActor.id}`, data);
+      // }
+
+      setIsActorFormOpen(false);
+      showToast(
+        actorFormMode === "create"
+          ? "Actor created successfully!"
+          : "Actor updated successfully!",
+        "success",
+      );
+
+      // TODO: Refresh actors list
+    } catch (error) {
+      console.error("Error saving actor:", error);
+      showToast("Failed to save actor. Please try again.", "error");
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deletingActor) {
+      return;
+    }
+
+    try {
+      // TODO: Replace with actual API call
+      // await apiClient.delete(`/actors/${deletingActor.id}`);
+
+      setIsDeleteModalOpen(false);
+      setDeletingActor(null);
+      showToast("Actor deleted successfully!", "success");
+
+      // TODO: Refresh actors list
+    } catch (error) {
+      console.error("Error deleting actor:", error);
+      showToast("Failed to delete actor. Please try again.", "error");
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setIsDeleteModalOpen(false);
+    setDeletingActor(null);
   };
 
   const handlePageChange = (nextPage: number) => {
@@ -420,6 +501,7 @@ export default function ActorsPage() {
           columns={actorColumns}
           showFilter
           showActions
+          showAdd
           selectedRowId={selectedActor?.id}
           page={page}
           pageSize={pageSize}
@@ -429,6 +511,7 @@ export default function ActorsPage() {
           onDelete={handleDeleteActor}
           onSelectedRow={handleSelectActor}
           onFilter={handleFilterActors}
+          onAdd={handleCreateActor}
           filterDebounceMs={1000}
           filterPlaceholder="Filter actors..."
           emptyMessage="No actors available."
@@ -480,6 +563,32 @@ export default function ActorsPage() {
           movieTitle={selectedMovie?.title}
           onSave={handleSaveRating}
           onCancel={handleCancelRating}
+        />
+
+        <ActorFormModal
+          key={`${actorFormMode}-${editingActor?.id || "new"}`}
+          isOpen={isActorFormOpen}
+          mode={actorFormMode}
+          initialData={
+            editingActor
+              ? {
+                  name: editingActor.name,
+                  nationality: editingActor.nationality,
+                  movieIds: [], // TODO: Get from selected actor's movies
+                }
+              : undefined
+          }
+          availableMovies={availableMovies}
+          onSave={handleSaveActor}
+          onCancel={() => setIsActorFormOpen(false)}
+        />
+
+        <ConfirmDeleteModal
+          isOpen={isDeleteModalOpen}
+          title="Delete Actor"
+          message={`Are you sure you want to delete "${deletingActor?.name}"? This action cannot be undone.`}
+          onConfirm={handleConfirmDelete}
+          onCancel={handleCancelDelete}
         />
       </main>
     </div>
