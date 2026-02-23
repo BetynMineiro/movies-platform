@@ -141,13 +141,7 @@ Stop everything:
 docker compose down
 ```
 
-### Run with Docker Compose
-
-From the repository root:
-
-```bash
-docker compose up --build
-```
+### Endpoints (Docker)
 
 Endpoints:
 
@@ -189,21 +183,21 @@ Triggers:
 Pipeline jobs:
 
 1. `backend-tests`
-	- Installs dependencies (`npm ci --legacy-peer-deps`)
-	- Builds backend (`npm run build`)
-	- Runs backend unit tests (`npm run test -- --runInBand`)
-	- Runs backend e2e tests (`npm run test:e2e`)
+   - Installs dependencies (`npm ci --legacy-peer-deps`)
+   - Builds backend (`npm run build`)
+   - Runs backend unit tests (`npm run test -- --runInBand`)
+   - Runs backend e2e tests (`npm run test:e2e`)
 
 2. `frontend-tests`
-	- Installs dependencies (`npm ci`)
-	- Runs lint (`npm run lint`)
-	- Builds frontend (`npm run build`)
+   - Installs dependencies (`npm ci`)
+   - Runs lint (`npm run lint`)
+   - Builds frontend (`npm run build`)
 
 3. `docker-build` (runs only after both test jobs pass)
-	- Builds Docker image (`docker build -t movies-platform:ci .`)
-	- Runs container on ports `3000` and `3001`
-	- Performs backend smoke check (`curl --fail http://localhost:3000/health`)
-	- Stops and removes test container
+   - Builds Docker image (`docker build -t movies-platform:ci .`)
+   - Runs container on ports `3000` and `3001`
+   - Performs backend smoke check (`curl --fail http://localhost:3000/health`)
+   - Stops and removes test container
 
 Useful note:
 
