@@ -16,9 +16,12 @@ import { CommonModule } from './common/common.module';
     CommonModule,
     TypeOrmModule.forRoot({
       type: 'sqlite',
-      database: 'database.sqlite',
+      database:
+        process.env.DATABASE_PATH ??
+        (process.env.NODE_ENV === 'test' ? ':memory:' : 'database.sqlite'),
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: true,
+      dropSchema: process.env.NODE_ENV === 'test',
     }),
     AuthModule,
     UsersModule,
