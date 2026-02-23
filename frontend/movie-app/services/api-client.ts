@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosHeaders } from "axios";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000";
@@ -50,10 +50,9 @@ apiClient.interceptors.request.use((config) => {
   const token = resolveStoredToken();
 
   if (token) {
-    config.headers = {
-      ...config.headers,
-      Authorization: `Bearer ${token}`,
-    };
+    const headers = AxiosHeaders.from(config.headers);
+    headers.set("Authorization", `Bearer ${token}`);
+    config.headers = headers;
   }
 
   return config;
