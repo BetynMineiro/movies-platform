@@ -22,15 +22,25 @@ export async function login(
   email: string,
   password: string,
 ): Promise<LoginResponse> {
-  const response = await apiClient.post<ApiResponse<LoginResponse>>(
-    "/auth/login",
-    {
-      email,
-      password,
-    },
-  );
+  const response = await apiClient.post<
+    ApiResponse<LoginResponse> | LoginResponse
+  >("/auth/login", {
+    email,
+    password,
+  });
 
-  const payload = response.data.data;
+  const responseData = response.data as
+    | ApiResponse<LoginResponse>
+    | LoginResponse;
+  const payload =
+    "data" in responseData
+      ? responseData.data
+      : (responseData as LoginResponse);
+
+  if (!payload?.accessToken || payload.accessToken === "undefined") {
+    throw new Error("Invalid login response: missing access token");
+  }
+
   setAccessToken(payload.accessToken);
 
   return payload;

@@ -52,17 +52,21 @@ export default function AddRatingModal({
       comment: comment.trim(),
       rating: parsedRating,
     });
+    setReviewer("");
+    setComment("");
+    setRating("");
+  };
+
+  const handleCancel = () => {
+    setReviewer("");
+    setComment("");
+    setRating("");
+    onCancel();
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-      <div
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-        onClick={onCancel}
-        role="button"
-        tabIndex={-1}
-        aria-label="Close modal"
-      />
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
       <div className="relative w-full max-w-lg rounded-3xl border border-stone-200 bg-white p-6 shadow-xl dark:border-stone-700 dark:bg-stone-950">
         <div className="flex flex-col gap-1">
           <p className="text-xs font-semibold uppercase tracking-[0.25em] text-stone-400">
@@ -129,7 +133,7 @@ export default function AddRatingModal({
         <div className="mt-6 flex items-center justify-end gap-3">
           <button
             type="button"
-            onClick={onCancel}
+            onClick={handleCancel}
             className="rounded-full border border-stone-300 px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-stone-700 transition hover:border-stone-400 dark:border-stone-600 dark:text-stone-200 dark:hover:border-stone-400"
           >
             Cancel

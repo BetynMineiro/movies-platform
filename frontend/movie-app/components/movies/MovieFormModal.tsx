@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import MultiSelect, { type MultiSelectOption } from "../common/MultiSelect";
 
 export interface MovieFormData {
@@ -30,13 +30,22 @@ export default function MovieFormModal({
   onSave,
   onCancel,
 }: MovieFormModalProps) {
-  const [formData, setFormData] = useState<MovieFormData>({
+  const buildInitialData = (): MovieFormData => ({
     title: initialData?.title || "",
     description: initialData?.description || "",
     releaseYear: initialData?.releaseYear || new Date().getFullYear(),
     genre: initialData?.genre || "",
     actorIds: initialData?.actorIds || [],
   });
+
+  const [formData, setFormData] = useState<MovieFormData>(buildInitialData);
+
+  useEffect(() => {
+    if (isOpen) {
+      setFormData(buildInitialData());
+      setErrors({});
+    }
+  }, [isOpen, mode, initialData]);
 
   const [errors, setErrors] = useState<
     Partial<Record<keyof MovieFormData, string>>
@@ -69,6 +78,8 @@ export default function MovieFormModal({
     e.preventDefault();
     if (validateForm()) {
       onSave(formData);
+      setFormData(buildInitialData());
+      setErrors({});
     }
   };
 
@@ -86,15 +97,15 @@ export default function MovieFormModal({
     return null;
   }
 
+  const handleCancel = () => {
+    setFormData(buildInitialData());
+    setErrors({});
+    onCancel();
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-      <div
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-        onClick={onCancel}
-        role="button"
-        tabIndex={-1}
-        aria-label="Close modal"
-      />
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
       <div className="relative w-full max-w-lg rounded-3xl border border-stone-200 bg-white p-6 shadow-xl dark:border-stone-700 dark:bg-stone-950">
         <div className="flex flex-col gap-1">
           <p className="text-xs font-semibold uppercase tracking-[0.25em] text-stone-400">
@@ -214,7 +225,7 @@ export default function MovieFormModal({
           <div className="mt-6 flex items-center justify-end gap-3">
             <button
               type="button"
-              onClick={onCancel}
+              onClick={handleCancel}
               className="rounded-full border border-stone-300 px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-stone-700 transition hover:border-stone-400 dark:border-stone-600 dark:text-stone-200 dark:hover:border-stone-400"
             >
               Cancel

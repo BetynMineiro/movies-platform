@@ -40,6 +40,10 @@ interface RatingRow {
   comment: string;
 }
 
+interface CreateEntityResponse<T> {
+  data: T;
+}
+
 const actorColumns: DataGridColumn<ActorRow>[] = [
   { key: "name", header: "Name" },
   { key: "nationality", header: "Nationality" },
@@ -109,6 +113,9 @@ export default function ActorsPage() {
     "create",
   );
   const [editingActor, setEditingActor] = useState<ActorRow | null>(null);
+  const [editingActorMovieIds, setEditingActorMovieIds] = useState<number[]>(
+    [],
+  );
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deletingActor, setDeletingActor] = useState<ActorRow | null>(null);
 
@@ -372,12 +379,61 @@ export default function ActorsPage() {
   const handleCreateActor = () => {
     setActorFormMode("create");
     setEditingActor(null);
+    setEditingActorMovieIds([]);
     setIsActorFormOpen(true);
   };
 
-  const handleUpdateActor = (actor: ActorRow) => {
+  const handleUpdateActor = async (actor: ActorRow) => {
     setActorFormMode("edit");
     setEditingActor(actor);
+
+    try {
+      const movieIds: number[] = [];
+      let cursor: number | undefined = undefined;
+      let hasNextPage = true;
+
+      while (hasNextPage) {
+        const moviesPageResponse = await apiClient.get(
+          `/actors/${actor.id}/movies`,
+          {
+            params: {
+              limit: 100,
+              ...(cursor !== undefined ? { cursor } : {}),
+            },
+          },
+        );
+        const moviesResponse =
+          moviesPageResponse.data as PaginatedResponse<MovieDto>;
+
+        const currentIds = moviesResponse.data
+          .map((movie) => movie.id)
+          .filter((id): id is number => Number.isInteger(id) && id > 0);
+
+        movieIds.push(...currentIds);
+
+        const meta = moviesResponse.meta;
+        const nextCursor = meta?.nextCursor;
+        hasNextPage = Boolean(meta?.hasNextPage ?? meta?.hasNext);
+        cursor =
+          nextCursor !== undefined && nextCursor !== null
+            ? Number(nextCursor)
+            : undefined;
+
+        if (!hasNextPage || cursor === undefined) {
+          break;
+        }
+      }
+
+      setEditingActorMovieIds(movieIds);
+    } catch (error) {
+      console.error("Error fetching actor movies for edit:", error);
+      setEditingActorMovieIds([]);
+      showToast(
+        "Could not pre-load actor movies for editing. You can still select them manually.",
+        "error",
+      );
+    }
+
     setIsActorFormOpen(true);
   };
 
@@ -394,12 +450,33 @@ export default function ActorsPage() {
           nationality: data.nationality,
         };
 
-        const response = await apiClient.post<ActorDto>("/actors", createDto);
-        const createdActorId = response.data.id;
+        const response = await apiClient.post<
+          CreateEntityResponse<ActorDto> | ActorDto
+        >("/actors", createDto);
+        const createdActor =
+          "data" in response.data
+            ? (response.data as CreateEntityResponse<ActorDto>).data
+            : (response.data as ActorDto);
+        const createdActorId = createdActor?.id;
+
+        if (!createdActorId) {
+          showToast(
+            "Actor created, but linking movies failed due to invalid actor id.",
+            "error",
+          );
+          setIsActorFormOpen(false);
+          await fetchActors();
+          return;
+        }
 
         if (data.movieIds && data.movieIds.length > 0) {
+          const validMovieIds = data.movieIds.filter(
+            (movieId): movieId is number =>
+              Number.isInteger(movieId) && movieId > 0,
+          );
+
           await Promise.all(
-            data.movieIds.map((movieId) =>
+            validMovieIds.map((movieId) =>
               apiClient.post(`/movies/${movieId}/actors/${createdActorId}`),
             ),
           );
@@ -415,8 +492,13 @@ export default function ActorsPage() {
         await apiClient.patch(`/actors/${editingActor.id}`, updateDto);
 
         if (data.movieIds && data.movieIds.length > 0) {
+          const validMovieIds = data.movieIds.filter(
+            (movieId): movieId is number =>
+              Number.isInteger(movieId) && movieId > 0,
+          );
+
           await Promise.all(
-            data.movieIds.map((movieId) =>
+            validMovieIds.map((movieId) =>
               apiClient.post(`/movies/${movieId}/actors/${editingActor.id}`),
             ),
           );
@@ -736,7 +818,7 @@ export default function ActorsPage() {
               ? {
                   name: editingActor.name,
                   nationality: editingActor.nationality,
-                  movieIds: relatedMovies.map((movie) => movie.id),
+                  movieIds: editingActorMovieIds,
                 }
               : undefined
           }

@@ -1,7 +1,14 @@
 "use client";
 
-import { createContext, useCallback, useContext, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import Toast, { type ToastType } from "../components/toast/Toast";
+import { AUTH_SESSION_EXPIRED_EVENT } from "@/services/api-client";
 
 interface ToastContextType {
   showToast: (message: string, type: ToastType) => void;
@@ -19,6 +26,21 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   const showToast = useCallback((message: string, type: ToastType) => {
     setToast({ message, type, id: Date.now() });
   }, []);
+
+  useEffect(() => {
+    const handleSessionExpired = () => {
+      showToast("Sessão expirada. Faça login novamente.", "error");
+    };
+
+    window.addEventListener(AUTH_SESSION_EXPIRED_EVENT, handleSessionExpired);
+
+    return () => {
+      window.removeEventListener(
+        AUTH_SESSION_EXPIRED_EVENT,
+        handleSessionExpired,
+      );
+    };
+  }, [showToast]);
 
   const handleClose = useCallback(() => {
     setToast(null);

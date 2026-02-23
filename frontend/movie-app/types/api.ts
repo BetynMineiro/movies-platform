@@ -18,8 +18,8 @@ export interface ActorDto {
 
 export interface RatingDto {
   id: number;
-  rating: number;
-  review: string;
+  score: number;
+  comment?: string;
   userId: number;
   movieId: number;
   createdAt: string;
