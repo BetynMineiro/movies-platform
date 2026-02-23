@@ -9,10 +9,10 @@ import {
 } from 'class-validator';
 
 export class CreateMovieRatingDto {
-  @ApiProperty({ example: 5, minimum: 1, maximum: 5 })
+  @ApiProperty({ example: 7, minimum: 0, maximum: 10 })
   @IsInt()
-  @Min(1)
-  @Max(5)
+  @Min(0)
+  @Max(10)
   score: number;
 
   @ApiProperty({

@@ -50,4 +50,24 @@ describe("AddRatingModal", () => {
 
     expect(onCancel).toHaveBeenCalled();
   });
+
+  it("does not allow score outside 0-10", () => {
+    const onSave = jest.fn();
+
+    render(<AddRatingModal isOpen onSave={onSave} onCancel={jest.fn()} />);
+
+    fireEvent.change(screen.getByPlaceholderText("Nome do avaliador"), {
+      target: { value: "Maria" },
+    });
+    fireEvent.change(screen.getByPlaceholderText("Descricao do rating"), {
+      target: { value: "Muito bom" },
+    });
+    fireEvent.change(screen.getByPlaceholderText("0-10"), {
+      target: { value: "11" },
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(onSave).not.toHaveBeenCalled();
+  });
 });

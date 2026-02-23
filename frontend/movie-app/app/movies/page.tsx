@@ -322,21 +322,20 @@ export default function MoviesPage() {
       const existing = prev[selectedMovie.id] ?? [];
       const nextId =
         existing.reduce((max, item) => Math.max(max, item.id), 0) + 1;
+      const nextRating = {
+        id: nextId,
+        rating: data.rating,
+        reviewer: data.reviewer,
+        comment: data.comment,
+      };
 
       return {
         ...prev,
-        [selectedMovie.id]: [
-          ...existing,
-          {
-            id: nextId,
-            rating: data.rating,
-            reviewer: data.reviewer,
-            comment: data.comment,
-          },
-        ],
+        [selectedMovie.id]: [nextRating, ...existing],
       };
     });
 
+    setMovieRatingsPage(1);
     setIsRatingModalOpen(false);
   };
 

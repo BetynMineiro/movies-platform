@@ -34,7 +34,8 @@ export default function AddRatingModal({
   }
 
   const parsedRating = Number(rating);
-  const hasValidRating = !Number.isNaN(parsedRating) && parsedRating >= 0;
+  const hasValidRating =
+    !Number.isNaN(parsedRating) && parsedRating >= 0 && parsedRating <= 10;
   const canSave =
     reviewer.trim().length > 0 &&
     comment.trim().length > 0 &&
@@ -97,9 +98,28 @@ export default function AddRatingModal({
             <input
               type="number"
               min={0}
+              max={10}
               step={1}
               value={rating}
-              onChange={(event) => setRating(event.target.value)}
+              onChange={(event) => {
+                const nextValue = event.target.value;
+                if (nextValue === "") {
+                  setRating("");
+                  return;
+                }
+
+                if (!/^[0-9]+$/.test(nextValue)) {
+                  return;
+                }
+
+                const numericValue = Number(nextValue);
+                if (numericValue < 0 || numericValue > 10) {
+                  setRating("");
+                  return;
+                }
+
+                setRating(nextValue);
+              }}
               className="rounded-2xl border border-stone-300 bg-white px-4 py-2 text-sm text-stone-700 outline-none transition focus:border-stone-400 dark:border-stone-700 dark:bg-stone-900/40 dark:text-stone-200 dark:focus:border-stone-500"
               placeholder="0-10"
             />
