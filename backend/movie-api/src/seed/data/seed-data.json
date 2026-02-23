@@ -1,0 +1,47 @@
+{
+  "actors": [
+    { "name": "Denzel Washington", "nationality": "American" },
+    { "name": "Laurence Fishburne", "nationality": "American" },
+    { "name": "Al Pacino", "nationality": "American" },
+    { "name": "Christian Bale", "nationality": "British" },
+    { "name": "Tom Hardy", "nationality": "British" },
+    { "name": "Idris Elba", "nationality": "British" },
+    { "name": "Marlon Brando", "nationality": "American" },
+    { "name": "Robert De Niro", "nationality": "American" },
+    { "name": "Leonardo DiCaprio", "nationality": "American" },
+    { "name": "Joseph Gordon-Levitt", "nationality": "American" },
+    { "name": "Sonia Braga", "nationality": "Brazilian" },
+    { "name": "Wagner Moura", "nationality": "Brazilian" },
+    { "name": "Alice Braga", "nationality": "Brazilian" },
+    { "name": "Seu Jorge", "nationality": "Brazilian" },
+    { "name": "Lazaro Ramos", "nationality": "Brazilian" },
+    { "name": "Matthew McConaughey", "nationality": "American" },
+    { "name": "Anne Hathaway", "nationality": "American" },
+    { "name": "Timothee Chalamet", "nationality": "American" },
+    { "name": "Zendaya", "nationality": "American" }
+  ],
+  "syntheticMovies": {
+    "count": 110,
+    "baseYear": 1980,
+    "maxYear": 2025,
+    "minActorsPerMovie": 2,
+    "maxActorsPerMovie": 4,
+    "ratingsPerMovie": 3,
+    "genres": [
+      "Action",
+      "Drama",
+      "Comedy",
+      "Sci-Fi",
+      "Crime",
+      "Thriller",
+      "Adventure"
+    ],
+    "ratingComments": [
+      "Great movie for testing pagination.",
+      "Solid performance from the cast.",
+      "Interesting plot and pacing.",
+      "Good cinematography and soundtrack.",
+      "A reliable entry in the catalog."
+    ]
+  }
+}

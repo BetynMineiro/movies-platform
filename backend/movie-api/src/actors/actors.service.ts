@@ -3,6 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import type { ApiResponse } from '../common/interfaces/api-response.interface';
 import { AppLoggerService } from '../common/services/app-logger.service';
+import { Movie } from '../movies/entities/movie.entity';
+import { QueryMoviesDto } from '../movies/dto/query-movies.dto';
 import { CreateActorDto } from './dto/create-actor.dto';
 import { QueryActorsDto } from './dto/query-actors.dto';
 import { UpdateActorDto } from './dto/update-actor.dto';
@@ -125,5 +127,54 @@ export class ActorsService {
       id,
       name,
     });
+  }
+
+  async getMoviesByActor(
+    id: number,
+    query: QueryMoviesDto,
+  ): Promise<ApiResponse<Movie[]>> {
+    const { title, limit = 10, cursor } = query;
+
+    this.logger.log('Getting movies by actor', 'ActorsService', {
+      id,
+      filter: { title, limit, cursor },
+    });
+
+    const actor = await this.actorsRepository.findOne({
+      where: { id },
+      relations: ['movies'],
+    });
+
+    if (!actor) {
+      this.logger.warn('Actor not found for movies lookup', 'ActorsService', {
+        id,
+      });
+      throw new NotFoundException(`Actor with ID ${id} not found`);
+    }
+
+    const normalizedTitle = title?.trim().toLowerCase();
+    const filteredMovies = (actor.movies ?? [])
+      .filter((movie) => {
+        if (!normalizedTitle) {
+          return true;
+        }
+
+        return movie.title.toLowerCase().includes(normalizedTitle);
+      })
+      .sort((first, second) => second.id - first.id)
+      .filter((movie) => (cursor ? movie.id < cursor : true));
+
+    const hasNext = filteredMovies.length > limit;
+    const data = hasNext ? filteredMovies.slice(0, limit) : filteredMovies;
+    const nextCursor = hasNext ? data[data.length - 1].id : undefined;
+
+    return {
+      data,
+      meta: {
+        limit,
+        hasNext,
+        nextCursor,
+      },
+    };
   }
 }

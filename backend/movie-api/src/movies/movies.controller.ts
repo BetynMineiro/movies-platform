@@ -25,6 +25,8 @@ import { CreateMovieDto } from './dto/create-movie.dto';
 import { UpdateMovieDto } from './dto/update-movie.dto';
 import { QueryMoviesDto } from './dto/query-movies.dto';
 import { Movie } from './entities/movie.entity';
+import { Actor } from '../actors/entities/actor.entity';
+import { QueryActorsDto } from '../actors/dto/query-actors.dto';
 
 @ApiTags('Movies')
 @ApiBearerAuth()
@@ -51,6 +53,16 @@ export class MoviesController {
     return { data };
   }
 
+  @Get(':id/actors')
+  @ApiOperation({ summary: 'Get all actors in a movie' })
+  @ApiOkResponse({ description: 'Returns actors for a movie' })
+  async getActorsByMovie(
+    @Param('id', ParseIntPipe) id: number,
+    @Query() query: QueryActorsDto,
+  ): Promise<ApiResponse<Actor[]>> {
+    return this.moviesService.getActorsByMovie(id, query);
+  }
+
   @Post()
   @ApiOperation({ summary: 'Create a new movie' })
   @ApiCreatedResponse({ description: 'Movie created successfully' })
@@ -69,6 +81,17 @@ export class MoviesController {
     @Body() updateMovieDto: UpdateMovieDto,
   ): Promise<ApiResponse<Movie>> {
     const data = await this.moviesService.update(id, updateMovieDto);
+    return { data };
+  }
+
+  @Post(':movieId/actors/:actorId')
+  @ApiOperation({ summary: 'Link an actor to a movie' })
+  @ApiOkResponse({ description: 'Actor linked to movie successfully' })
+  async addActorToMovie(
+    @Param('movieId', ParseIntPipe) movieId: number,
+    @Param('actorId', ParseIntPipe) actorId: number,
+  ): Promise<ApiResponse<Movie>> {
+    const data = await this.moviesService.addActorToMovie(movieId, actorId);
     return { data };
   }
 

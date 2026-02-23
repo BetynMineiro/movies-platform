@@ -2,9 +2,11 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Movie } from './entities/movie.entity';
+import { Actor } from '../actors/entities/actor.entity';
 import { CreateMovieDto } from './dto/create-movie.dto';
 import { UpdateMovieDto } from './dto/update-movie.dto';
 import { QueryMoviesDto } from './dto/query-movies.dto';
+import { QueryActorsDto } from '../actors/dto/query-actors.dto';
 import type { ApiResponse } from '../common/interfaces/api-response.interface';
 import { AppLoggerService } from '../common/services/app-logger.service';
 
@@ -13,6 +15,8 @@ export class MoviesService {
   constructor(
     @InjectRepository(Movie)
     private readonly moviesRepository: Repository<Movie>,
+    @InjectRepository(Actor)
+    private readonly actorsRepository: Repository<Actor>,
     private readonly logger: AppLoggerService,
   ) {}
 
@@ -123,6 +127,100 @@ export class MoviesService {
     this.logger.log('Movie removed successfully', 'MoviesService', {
       id,
       title,
+    });
+  }
+
+  async getActorsByMovie(
+    id: number,
+    query: QueryActorsDto,
+  ): Promise<ApiResponse<Actor[]>> {
+    const { name, limit = 10, cursor } = query;
+
+    this.logger.log('Getting actors by movie', 'MoviesService', {
+      id,
+      filter: { name, limit, cursor },
+    });
+
+    const movie = await this.moviesRepository.findOne({
+      where: { id },
+      relations: ['actors'],
+    });
+
+    if (!movie) {
+      this.logger.warn('Movie not found for actors lookup', 'MoviesService', {
+        id,
+      });
+      throw new NotFoundException(`Movie with ID ${id} not found`);
+    }
+
+    const normalizedName = name?.trim().toLowerCase();
+    const filteredActors = (movie.actors ?? [])
+      .filter((actor) => {
+        if (!normalizedName) {
+          return true;
+        }
+
+        return actor.name.toLowerCase().includes(normalizedName);
+      })
+      .sort((first, second) => second.id - first.id)
+      .filter((actor) => (cursor ? actor.id < cursor : true));
+
+    const hasNext = filteredActors.length > limit;
+    const data = hasNext ? filteredActors.slice(0, limit) : filteredActors;
+    const nextCursor = hasNext ? data[data.length - 1].id : undefined;
+
+    return {
+      data,
+      meta: {
+        limit,
+        hasNext,
+        nextCursor,
+      },
+    };
+  }
+
+  async addActorToMovie(movieId: number, actorId: number): Promise<Movie> {
+    this.logger.log('Adding actor to movie', 'MoviesService', {
+      movieId,
+      actorId,
+    });
+
+    const movie = await this.moviesRepository.findOne({
+      where: { id: movieId },
+      relations: ['actors'],
+    });
+
+    if (!movie) {
+      throw new NotFoundException(`Movie with ID ${movieId} not found`);
+    }
+
+    const actor = await this.actorsRepository.findOne({
+      where: { id: actorId },
+    });
+
+    if (!actor) {
+      throw new NotFoundException(`Actor with ID ${actorId} not found`);
+    }
+
+    const currentActors = movie.actors ?? [];
+    const alreadyLinked = currentActors.some(
+      (current) => current.id === actorId,
+    );
+
+    if (!alreadyLinked) {
+      movie.actors = [...currentActors, actor];
+      await this.moviesRepository.save(movie);
+    }
+
+    this.logger.log('Actor linked to movie successfully', 'MoviesService', {
+      movieId,
+      actorId,
+      alreadyLinked,
+    });
+
+    return this.moviesRepository.findOneOrFail({
+      where: { id: movieId },
+      relations: ['actors'],
     });
   }
 }

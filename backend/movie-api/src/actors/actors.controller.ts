@@ -25,6 +25,8 @@ import { CreateActorDto } from './dto/create-actor.dto';
 import { QueryActorsDto } from './dto/query-actors.dto';
 import { UpdateActorDto } from './dto/update-actor.dto';
 import { Actor } from './entities/actor.entity';
+import { Movie } from '../movies/entities/movie.entity';
+import { QueryMoviesDto } from '../movies/dto/query-movies.dto';
 
 @ApiTags('Actors')
 @ApiBearerAuth()
@@ -49,6 +51,16 @@ export class ActorsController {
   ): Promise<ApiResponse<Actor>> {
     const data = await this.actorsService.findOne(id);
     return { data };
+  }
+
+  @Get(':id/movies')
+  @ApiOperation({ summary: 'Get all movies for an actor' })
+  @ApiOkResponse({ description: 'Returns movies for an actor' })
+  async getMoviesByActor(
+    @Param('id', ParseIntPipe) id: number,
+    @Query() query: QueryMoviesDto,
+  ): Promise<ApiResponse<Movie[]>> {
+    return this.actorsService.getMoviesByActor(id, query);
   }
 
   @Post()

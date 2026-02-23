@@ -4,7 +4,9 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  ManyToMany,
 } from 'typeorm';
+import { Movie } from '../../movies/entities/movie.entity';
 
 @Entity('actors')
 export class Actor {
@@ -16,6 +18,9 @@ export class Actor {
 
   @Column()
   nationality: string;
+
+  @ManyToMany(() => Movie, (movie) => movie.actors)
+  movies?: Movie[];
 
   @CreateDateColumn()
   createdAt: Date;

@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { NotFoundException } from '@nestjs/common';
 import { MoviesService } from './movies.service';
 import { Movie } from './entities/movie.entity';
+import { Actor } from '../actors/entities/actor.entity';
 import { CreateMovieDto } from './dto/create-movie.dto';
 import { UpdateMovieDto } from './dto/update-movie.dto';
 import { QueryMoviesDto } from './dto/query-movies.dto';
@@ -36,6 +37,12 @@ describe('MoviesService', () => {
             create: jest.fn(),
             save: jest.fn(),
             remove: jest.fn(),
+          },
+        },
+        {
+          provide: getRepositoryToken(Actor),
+          useValue: {
+            findOne: jest.fn(),
           },
         },
         {
@@ -154,7 +161,6 @@ describe('MoviesService', () => {
         description: 'New Description',
         releaseYear: 2024,
         genre: 'Drama',
-        director: 'New Director',
       };
 
       repository.create.mockReturnValue(mockMovie);

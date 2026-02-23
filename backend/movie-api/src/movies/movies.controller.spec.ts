@@ -80,7 +80,6 @@ describe('MoviesController', () => {
         description: 'New Description',
         releaseYear: 2024,
         genre: 'Drama',
-        director: 'New Director',
       };
 
       service.create.mockResolvedValue(mockMovie);
