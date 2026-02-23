@@ -31,6 +31,7 @@ interface DataGridProps<T extends { id: number | string }> {
   filterPlaceholder?: string;
   initialFilterValue?: string;
   emptyMessage?: string;
+  tableMinWidthClass?: string;
 }
 
 export default function DataGrid<T extends { id: number | string }>({
@@ -56,6 +57,7 @@ export default function DataGrid<T extends { id: number | string }>({
   filterPlaceholder = "Type to filter...",
   initialFilterValue = "",
   emptyMessage = "No records found.",
+  tableMinWidthClass = "min-w-[620px]",
 }: DataGridProps<T>) {
   const [filterValue, setFilterValue] = useState(initialFilterValue);
   const [internalSelectedRowId, setInternalSelectedRowId] = useState<
@@ -156,7 +158,9 @@ export default function DataGrid<T extends { id: number | string }>({
       </div>
 
       <div className="mt-4 overflow-x-auto">
-        <table className="w-full min-w-[620px] border-collapse text-left text-sm">
+        <table
+          className={`w-full ${tableMinWidthClass} border-collapse text-left text-sm`}
+        >
           <thead>
             <tr className="border-b border-stone-200 dark:border-stone-700">
               {columns.map((column) => (

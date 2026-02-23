@@ -156,14 +156,11 @@ const movieColumns: DataGridColumn<MovieRow>[] = [
 
 const actorColumns: DataGridColumn<ActorRow>[] = [
   { key: "name", header: "Name" },
-  { key: "nationality", header: "Nationality" },
-  { key: "age", header: "Age" },
 ];
 
 const ratingColumns: DataGridColumn<RatingRow>[] = [
   { key: "rating", header: "Rating" },
-  { key: "reviewer", header: "Reviewer" },
-  { key: "comment", header: "Comment" },
+  { key: "comment", header: "Description" },
 ];
 
 export default function MoviesPage() {
@@ -301,6 +298,12 @@ export default function MoviesPage() {
     setMovieRatingsPage(1);
   };
 
+  const handleAddRating = () => {
+    if (selectedMovie) {
+      router.push(`/movies/${selectedMovie.id}/ratings/create`);
+    }
+  };
+
   return (
     <div className="relative">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(245,214,187,0.55),_rgba(247,241,233,0.1)_55%)] dark:bg-[radial-gradient(circle_at_top,_rgba(60,57,48,0.8),_rgba(18,17,15,0.2)_55%)]" />
@@ -360,13 +363,14 @@ export default function MoviesPage() {
         />
 
         {selectedMovie && (
-          <div className="flex flex-col gap-6">
+          <div className="grid gap-6 lg:grid-cols-2">
             <DataGrid
               title={`Actors in "${selectedMovie.title}"`}
               rows={filteredActors}
               columns={actorColumns}
               showFilter
               showActions={false}
+              tableMinWidthClass="min-w-0"
               page={relatedActorsPage}
               pageSize={relatedDataPageSize}
               totalPages={relatedActorsTotalPages}
@@ -382,11 +386,14 @@ export default function MoviesPage() {
               columns={ratingColumns}
               showFilter
               showActions={false}
+              showAdd
+              tableMinWidthClass="min-w-0"
               page={movieRatingsPage}
               pageSize={relatedDataPageSize}
               totalPages={ratingsTotalPages}
               onPageChange={setMovieRatingsPage}
               onFilter={handleFilterRatings}
+              onAdd={handleAddRating}
               filterDebounceMs={1000}
               filterPlaceholder="Filter ratings..."
               emptyMessage="No ratings available for this movie."
