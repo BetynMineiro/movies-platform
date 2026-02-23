@@ -25,6 +25,10 @@ import { QueryMovieRatingsDto } from './dto/query-movie-ratings.dto';
 import { UpdateMovieRatingDto } from './dto/update-movie-rating.dto';
 import { MovieRating } from './entities/movie-rating.entity';
 import { MovieRatingsService } from './movie-ratings.service';
+import {
+  MovieRatingResponseDto,
+  MovieRatingsListResponseDto,
+} from './dto/movie-rating-responses.dto';
 
 @ApiTags('Movie Ratings')
 @ApiBearerAuth()
@@ -36,7 +40,10 @@ export class MovieRatingsController {
   @ApiOperation({
     summary: 'Get all movie ratings with pagination and optional movie filter',
   })
-  @ApiOkResponse({ description: 'Returns paginated movie ratings list' })
+  @ApiOkResponse({
+    description: 'Returns paginated movie ratings list',
+    type: MovieRatingsListResponseDto,
+  })
   async findAll(
     @Query() query: QueryMovieRatingsDto,
   ): Promise<ApiResponse<MovieRating[]>> {
@@ -45,7 +52,10 @@ export class MovieRatingsController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Get movie rating by ID' })
-  @ApiOkResponse({ description: 'Returns a single movie rating' })
+  @ApiOkResponse({
+    description: 'Returns a single movie rating',
+    type: MovieRatingResponseDto,
+  })
   async findOne(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<ApiResponse<MovieRating>> {
@@ -55,7 +65,10 @@ export class MovieRatingsController {
 
   @Post()
   @ApiOperation({ summary: 'Create a new movie rating' })
-  @ApiCreatedResponse({ description: 'Movie rating created successfully' })
+  @ApiCreatedResponse({
+    description: 'Movie rating created successfully',
+    type: MovieRatingResponseDto,
+  })
   async create(
     @Body() createDto: CreateMovieRatingDto,
   ): Promise<ApiResponse<MovieRating>> {
@@ -65,7 +78,10 @@ export class MovieRatingsController {
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update movie rating by ID' })
-  @ApiOkResponse({ description: 'Movie rating updated successfully' })
+  @ApiOkResponse({
+    description: 'Movie rating updated successfully',
+    type: MovieRatingResponseDto,
+  })
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateDto: UpdateMovieRatingDto,

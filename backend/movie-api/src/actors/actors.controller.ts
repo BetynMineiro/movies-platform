@@ -27,6 +27,11 @@ import { UpdateActorDto } from './dto/update-actor.dto';
 import { Actor } from './entities/actor.entity';
 import { Movie } from '../movies/entities/movie.entity';
 import { QueryMoviesDto } from '../movies/dto/query-movies.dto';
+import {
+  ActorMoviesListResponseDto,
+  ActorResponseDto,
+  ActorsListResponseDto,
+} from './dto/actor-responses.dto';
 
 @ApiTags('Actors')
 @ApiBearerAuth()
@@ -38,14 +43,20 @@ export class ActorsController {
   @ApiOperation({
     summary: 'Get all actors with pagination and optional filter',
   })
-  @ApiOkResponse({ description: 'Returns paginated actors list' })
+  @ApiOkResponse({
+    description: 'Returns paginated actors list',
+    type: ActorsListResponseDto,
+  })
   async findAll(@Query() query: QueryActorsDto): Promise<ApiResponse<Actor[]>> {
     return this.actorsService.findAll(query);
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get actor by ID' })
-  @ApiOkResponse({ description: 'Returns a single actor' })
+  @ApiOkResponse({
+    description: 'Returns a single actor',
+    type: ActorResponseDto,
+  })
   async findOne(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<ApiResponse<Actor>> {
@@ -55,7 +66,10 @@ export class ActorsController {
 
   @Get(':id/movies')
   @ApiOperation({ summary: 'Get all movies for an actor' })
-  @ApiOkResponse({ description: 'Returns movies for an actor' })
+  @ApiOkResponse({
+    description: 'Returns movies for an actor',
+    type: ActorMoviesListResponseDto,
+  })
   async getMoviesByActor(
     @Param('id', ParseIntPipe) id: number,
     @Query() query: QueryMoviesDto,
@@ -65,7 +79,10 @@ export class ActorsController {
 
   @Post()
   @ApiOperation({ summary: 'Create a new actor' })
-  @ApiCreatedResponse({ description: 'Actor created successfully' })
+  @ApiCreatedResponse({
+    description: 'Actor created successfully',
+    type: ActorResponseDto,
+  })
   async create(
     @Body() createActorDto: CreateActorDto,
   ): Promise<ApiResponse<Actor>> {
@@ -75,7 +92,10 @@ export class ActorsController {
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update actor by ID' })
-  @ApiOkResponse({ description: 'Actor updated successfully' })
+  @ApiOkResponse({
+    description: 'Actor updated successfully',
+    type: ActorResponseDto,
+  })
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateActorDto: UpdateActorDto,

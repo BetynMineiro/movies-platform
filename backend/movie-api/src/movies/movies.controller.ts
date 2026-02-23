@@ -27,6 +27,11 @@ import { QueryMoviesDto } from './dto/query-movies.dto';
 import { Movie } from './entities/movie.entity';
 import { Actor } from '../actors/entities/actor.entity';
 import { QueryActorsDto } from '../actors/dto/query-actors.dto';
+import {
+  MovieActorsListResponseDto,
+  MovieResponseDto,
+  MoviesListResponseDto,
+} from './dto/movie-responses.dto';
 
 @ApiTags('Movies')
 @ApiBearerAuth()
@@ -38,14 +43,20 @@ export class MoviesController {
   @ApiOperation({
     summary: 'Get all movies with pagination and optional filter',
   })
-  @ApiOkResponse({ description: 'Returns paginated movies list' })
+  @ApiOkResponse({
+    description: 'Returns paginated movies list',
+    type: MoviesListResponseDto,
+  })
   async findAll(@Query() query: QueryMoviesDto): Promise<ApiResponse<Movie[]>> {
     return this.moviesService.findAll(query);
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get movie by ID' })
-  @ApiOkResponse({ description: 'Returns a single movie' })
+  @ApiOkResponse({
+    description: 'Returns a single movie',
+    type: MovieResponseDto,
+  })
   async findOne(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<ApiResponse<Movie>> {
@@ -55,7 +66,10 @@ export class MoviesController {
 
   @Get(':id/actors')
   @ApiOperation({ summary: 'Get all actors in a movie' })
-  @ApiOkResponse({ description: 'Returns actors for a movie' })
+  @ApiOkResponse({
+    description: 'Returns actors for a movie',
+    type: MovieActorsListResponseDto,
+  })
   async getActorsByMovie(
     @Param('id', ParseIntPipe) id: number,
     @Query() query: QueryActorsDto,
@@ -65,7 +79,10 @@ export class MoviesController {
 
   @Post()
   @ApiOperation({ summary: 'Create a new movie' })
-  @ApiCreatedResponse({ description: 'Movie created successfully' })
+  @ApiCreatedResponse({
+    description: 'Movie created successfully',
+    type: MovieResponseDto,
+  })
   async create(
     @Body() createMovieDto: CreateMovieDto,
   ): Promise<ApiResponse<Movie>> {
@@ -75,7 +92,10 @@ export class MoviesController {
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update movie by ID' })
-  @ApiOkResponse({ description: 'Movie updated successfully' })
+  @ApiOkResponse({
+    description: 'Movie updated successfully',
+    type: MovieResponseDto,
+  })
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateMovieDto: UpdateMovieDto,
@@ -86,7 +106,10 @@ export class MoviesController {
 
   @Post(':movieId/actors/:actorId')
   @ApiOperation({ summary: 'Link an actor to a movie' })
-  @ApiOkResponse({ description: 'Actor linked to movie successfully' })
+  @ApiOkResponse({
+    description: 'Actor linked to movie successfully',
+    type: MovieResponseDto,
+  })
   async addActorToMovie(
     @Param('movieId', ParseIntPipe) movieId: number,
     @Param('actorId', ParseIntPipe) actorId: number,
