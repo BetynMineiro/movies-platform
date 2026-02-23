@@ -41,6 +41,23 @@ describe("DataGrid", () => {
     expect(screen.getAllByRole("button", { name: "Delete" }).length).toBe(2);
   });
 
+  it("applies custom table min width class", () => {
+    const { container } = render(
+      <DataGrid
+        title="Users"
+        rows={rows}
+        columns={columns}
+        page={1}
+        pageSize={2}
+        tableMinWidthClass="min-w-0"
+        onPageChange={jest.fn()}
+      />,
+    );
+
+    const table = container.querySelector("table");
+    expect(table).toHaveClass("min-w-0");
+  });
+
   it("calls action handlers with selected row", () => {
     const onUpdate = jest.fn();
     const onDelete = jest.fn();

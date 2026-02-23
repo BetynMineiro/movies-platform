@@ -61,7 +61,7 @@ describe("MoviesPage", () => {
     fireEvent.click(screen.getByText("Inception"));
 
     expect(screen.getByText("Mind-bending masterpiece")).toBeInTheDocument();
-    expect(screen.getByText("John Doe")).toBeInTheDocument();
+    expect(screen.getByText("Great visual effects")).toBeInTheDocument();
   });
 
   it("clears related grids when movie changes", () => {
@@ -236,8 +236,8 @@ describe("MoviesPage", () => {
     render(<MoviesPage />);
 
     fireEvent.click(screen.getByText("Inception"));
-    expect(screen.getByText("John Doe")).toBeInTheDocument();
-    expect(screen.getByText("Jane Smith")).toBeInTheDocument();
+    expect(screen.getByText("Mind-bending masterpiece")).toBeInTheDocument();
+    expect(screen.getByText("Great visual effects")).toBeInTheDocument();
 
     fireEvent.change(screen.getByPlaceholderText("Filter ratings..."), {
       target: { value: "John" },
@@ -247,10 +247,52 @@ describe("MoviesPage", () => {
       jest.advanceTimersByTime(1000);
     });
 
-    expect(screen.getByText("John Doe")).toBeInTheDocument();
-    expect(screen.queryByText("Jane Smith")).not.toBeInTheDocument();
+    expect(screen.getByText("Mind-bending masterpiece")).toBeInTheDocument();
+    expect(screen.queryByText("Great visual effects")).not.toBeInTheDocument();
 
     jest.useRealTimers();
+  });
+
+  it("adds rating from modal and updates grid", () => {
+    render(<MoviesPage />);
+
+    fireEvent.click(screen.getByText("Inception"));
+    fireEvent.click(screen.getByRole("button", { name: "+ Add" }));
+
+    fireEvent.change(screen.getByPlaceholderText("Nome do avaliador"), {
+      target: { value: "Maria" },
+    });
+    fireEvent.change(screen.getByPlaceholderText("Descricao do rating"), {
+      target: { value: "Novo comentario" },
+    });
+    fireEvent.change(screen.getByPlaceholderText("0-10"), {
+      target: { value: "7" },
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(screen.getByText("Novo comentario")).toBeInTheDocument();
+  });
+
+  it("does not add rating when modal is canceled", () => {
+    render(<MoviesPage />);
+
+    fireEvent.click(screen.getByText("Inception"));
+    fireEvent.click(screen.getByRole("button", { name: "+ Add" }));
+
+    fireEvent.change(screen.getByPlaceholderText("Nome do avaliador"), {
+      target: { value: "Maria" },
+    });
+    fireEvent.change(screen.getByPlaceholderText("Descricao do rating"), {
+      target: { value: "Comentario cancelado" },
+    });
+    fireEvent.change(screen.getByPlaceholderText("0-10"), {
+      target: { value: "7" },
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+
+    expect(screen.queryByText("Comentario cancelado")).not.toBeInTheDocument();
   });
 
   it("clears actor filter when changing movies", () => {

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { LogoutButton } from "@/components/auth";
+import AddRatingModal from "@/components/ratings/AddRatingModal";
 import { DataGrid, type DataGridColumn } from "@/components/grid";
 
 interface ActorRow {
@@ -171,6 +172,8 @@ export default function ActorsPage() {
   const [selectedMovie, setSelectedMovie] = useState<MovieRow | null>(null);
   const [movieRatingsPage, setMovieRatingsPage] = useState(1);
   const [ratingsFilter, setRatingsFilter] = useState("");
+  const [ratingsByMovie, setRatingsByMovie] = useState(movieRatings);
+  const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
   const pageSize = 4;
   const relatedDataPageSize = 5;
 
@@ -214,7 +217,7 @@ export default function ActorsPage() {
     Math.ceil(filteredMovies.length / relatedDataPageSize),
   );
 
-  const ratings = selectedMovie ? movieRatings[selectedMovie.id] || [] : [];
+  const ratings = selectedMovie ? ratingsByMovie[selectedMovie.id] || [] : [];
 
   const filteredRatings = ratings.filter((rating) => {
     const query = ratingsFilter.toLowerCase();
@@ -325,9 +328,46 @@ export default function ActorsPage() {
   };
 
   const handleAddRating = () => {
-    if (selectedMovie) {
-      router.push(`/movies/${selectedMovie.id}/ratings/create`);
+    if (!selectedMovie) {
+      return;
     }
+
+    setIsRatingModalOpen(true);
+  };
+
+  const handleSaveRating = (data: {
+    reviewer: string;
+    comment: string;
+    rating: number;
+  }) => {
+    if (!selectedMovie) {
+      return;
+    }
+
+    setRatingsByMovie((prev) => {
+      const existing = prev[selectedMovie.id] ?? [];
+      const nextId =
+        existing.reduce((max, item) => Math.max(max, item.id), 0) + 1;
+
+      return {
+        ...prev,
+        [selectedMovie.id]: [
+          ...existing,
+          {
+            id: nextId,
+            rating: data.rating,
+            reviewer: data.reviewer,
+            comment: data.comment,
+          },
+        ],
+      };
+    });
+
+    setIsRatingModalOpen(false);
+  };
+
+  const handleCancelRating = () => {
+    setIsRatingModalOpen(false);
   };
 
   return (
@@ -428,6 +468,12 @@ export default function ActorsPage() {
             )}
           </div>
         )}
+        <AddRatingModal
+          isOpen={isRatingModalOpen}
+          movieTitle={selectedMovie?.title}
+          onSave={handleSaveRating}
+          onCancel={handleCancelRating}
+        />
       </main>
     </div>
   );
