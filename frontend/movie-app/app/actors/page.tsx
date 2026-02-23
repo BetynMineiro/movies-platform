@@ -61,16 +61,13 @@ export default function ActorsPage() {
   const router = useRouter();
   const { showToast } = useToast();
 
-  // State for actors data
   const [actors, setActors] = useState<ActorRow[]>([]);
   const [isLoadingActors, setIsLoadingActors] = useState(true);
 
-  // State for movies (for multiselect)
   const [availableMovies, setAvailableMovies] = useState<MultiSelectOption[]>(
     [],
   );
 
-  // State for pagination and filtering
   const [page, setPage] = useState(1);
   const [filter, setFilter] = useState("");
   const [totalActors, setTotalActors] = useState(0);
@@ -80,7 +77,6 @@ export default function ActorsPage() {
   const [actorsHasNextPage, setActorsHasNextPage] = useState(false);
   const [actorsHasPreviousPage, setActorsHasPreviousPage] = useState(false);
 
-  // State for selected actor and related data
   const [selectedActor, setSelectedActor] = useState<ActorRow | null>(null);
   const [relatedMovies, setRelatedMovies] = useState<MovieRow[]>([]);
   const [isLoadingMovies, setIsLoadingMovies] = useState(false);
@@ -95,7 +91,6 @@ export default function ActorsPage() {
   const [relatedMoviesHasPreviousPage, setRelatedMoviesHasPreviousPage] =
     useState(false);
 
-  // State for selected movie and ratings
   const [selectedMovie, setSelectedMovie] = useState<MovieRow | null>(null);
   const [ratings, setRatings] = useState<RatingRow[]>([]);
   const [isLoadingRatings, setIsLoadingRatings] = useState(false);
@@ -109,7 +104,6 @@ export default function ActorsPage() {
   const [ratingsHasPreviousPage, setRatingsHasPreviousPage] = useState(false);
   const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
 
-  // Actor CRUD modals
   const [isActorFormOpen, setIsActorFormOpen] = useState(false);
   const [actorFormMode, setActorFormMode] = useState<"create" | "edit">(
     "create",
@@ -121,7 +115,6 @@ export default function ActorsPage() {
   const pageSize = 4;
   const relatedDataPageSize = 5;
 
-  // Fetch actors from API
   const fetchActors = async () => {
     try {
       setIsLoadingActors(true);
@@ -169,7 +162,6 @@ export default function ActorsPage() {
     }
   };
 
-  // Fetch all movies for multiselect (with large page size)
   const fetchAllMovies = async () => {
     try {
       const response = await apiClient.get<PaginatedResponse<MovieDto>>(
@@ -195,7 +187,6 @@ export default function ActorsPage() {
     }
   };
 
-  // Fetch movies for selected actor
   const fetchActorMovies = async (actorId: number) => {
     try {
       setIsLoadingMovies(true);
@@ -245,7 +236,6 @@ export default function ActorsPage() {
     }
   };
 
-  // Fetch ratings for selected movie
   const fetchMovieRatings = async (movieId: number) => {
     try {
       setIsLoadingRatings(true);
@@ -293,32 +283,24 @@ export default function ActorsPage() {
     }
   };
 
-  // Effect to fetch actors when page or filter changes
   useEffect(() => {
     fetchActors();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, filter]);
 
-  // Effect to fetch all movies for multiselect on mount
   useEffect(() => {
     fetchAllMovies();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Effect to fetch movies when selected actor or related movies page/filter changes
   useEffect(() => {
     if (selectedActor) {
       fetchActorMovies(selectedActor.id);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedActor?.id, relatedMoviesPage, moviesFilter]);
 
-  // Effect to fetch ratings when selected movie or ratings page changes
   useEffect(() => {
     if (selectedMovie) {
       fetchMovieRatings(selectedMovie.id);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedMovie?.id, movieRatingsPage]);
 
   const filteredActorRows = actors.filter((actor) => {
@@ -407,7 +389,6 @@ export default function ActorsPage() {
   const handleSaveActor = async (data: ActorFormData) => {
     try {
       if (actorFormMode === "create") {
-        // Create new actor
         const createDto: CreateActorDto = {
           name: data.name,
           nationality: data.nationality,
@@ -416,7 +397,6 @@ export default function ActorsPage() {
         const response = await apiClient.post<ActorDto>("/actors", createDto);
         const createdActorId = response.data.id;
 
-        // Link movies to the actor
         if (data.movieIds && data.movieIds.length > 0) {
           await Promise.all(
             data.movieIds.map((movieId) =>
@@ -427,7 +407,6 @@ export default function ActorsPage() {
 
         showToast("Actor created successfully!", "success");
       } else if (editingActor) {
-        // Update existing actor
         const updateDto: UpdateActorDto = {
           name: data.name,
           nationality: data.nationality,
@@ -435,7 +414,6 @@ export default function ActorsPage() {
 
         await apiClient.patch(`/actors/${editingActor.id}`, updateDto);
 
-        // Link movies to the actor if provided
         if (data.movieIds && data.movieIds.length > 0) {
           await Promise.all(
             data.movieIds.map((movieId) =>
@@ -449,10 +427,8 @@ export default function ActorsPage() {
 
       setIsActorFormOpen(false);
 
-      // Refresh actors list
       await fetchActors();
 
-      // If an actor is selected and we just edited it, refresh related data
       if (
         actorFormMode === "edit" &&
         selectedActor &&
@@ -479,7 +455,6 @@ export default function ActorsPage() {
       setDeletingActor(null);
       showToast("Actor deleted successfully!", "success");
 
-      // Clear selection if deleted actor was selected
       if (selectedActor?.id === deletingActor.id) {
         setSelectedActor(null);
         setRelatedMovies([]);
@@ -487,7 +462,6 @@ export default function ActorsPage() {
         setRatings([]);
       }
 
-      // Refresh actors list
       await fetchActors();
     } catch (error) {
       console.error("Error deleting actor:", error);
@@ -630,7 +604,6 @@ export default function ActorsPage() {
       setIsRatingModalOpen(false);
       showToast("Rating saved successfully!", "success");
 
-      // Refresh only the ratings grid (not the main actors grid)
       await fetchMovieRatings(selectedMovie.id);
       setMovieRatingsPage(1);
       setRatingsCursorByPage({ 1: undefined });

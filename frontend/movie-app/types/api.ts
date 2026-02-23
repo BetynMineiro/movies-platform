@@ -1,4 +1,3 @@
-// Backend DTOs matching the API responses
 
 export interface MovieDto {
   id: number;
